@@ -5,9 +5,10 @@ import AppFooter from './AppFooter.vue';
 import AppSidebar from './AppSidebar.vue';
 import AppConfig from './AppConfig.vue';
 import { useLayout } from '@/layout/composables/layout';
-import { isSignedIn } from '@/service/supabase';
+import { isSignedIn } from '@/service/supabase/supabase';
 import { useRouter } from 'vue-router';
 
+const AppConfigRef = ref()
 const router = useRouter();
 const { layoutConfig, layoutState, isSidebarActive } = useLayout();
 const outsideClickListener = ref(null);
@@ -65,17 +66,17 @@ onBeforeMount(async () => {
 
 <template>
     <div class="layout-wrapper" :class="containerClass">
-        <app-topbar></app-topbar>
+        <AppTopbar @changeTheme="AppConfigRef.toggleThemeConfig()"></AppTopbar>
         <div class="layout-sidebar">
-            <app-sidebar></app-sidebar>
+            <AppSidebar></AppSidebar>
         </div>
         <div class="layout-main-container">
             <div class="layout-main">
-                <router-view></router-view>
+                <RouterView></RouterView>
             </div>
-            <app-footer></app-footer>
+            <AppFooter></AppFooter>
         </div>
-        <app-config></app-config>
+        <AppConfig ref="AppConfigRef"></AppConfig>
         <div class="layout-mask"></div>
     </div>
 </template>

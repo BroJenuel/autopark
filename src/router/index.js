@@ -14,6 +14,99 @@ const router = createRouter({
                     component: () => import('@/views/Dashboard.vue')
                 },
                 {
+                    path: 'profile',
+                    name: 'Profile',
+                    component: () => import('@/views/user/profile.vue')
+                },
+                {
+                    path: 'events',
+                    name: 'Events',
+                    component: () => import('@/views/pages/events/Events.vue')
+                },
+                {
+                    path: 'announcement',
+                    name: 'Announcement',
+                    component: () => import('@/views/pages/Announcement/Announcement.vue')
+                },
+                {
+                    path: 'parking-slot',
+                    name: 'Parking Slot',
+                    component: () => import('@/views/pages/ParkingSlot/ParkingSlot.vue')
+                },
+                {
+                    path: 'manage-events-and-announcements',
+                    name: 'Manage Events And Announcements',
+                    component: () => import('@/views/pages/ManageEventsAndAnnouncements/ManageEventsAndAnnouncements.vue')
+                },
+                {
+                    path: 'maintenance',
+                    name: 'Maintenance',
+                    children: [
+                        {
+                            path: 'street',
+                            name: 'Street',
+                            component: () => import('@/views/pages/Maintenance/Street.vue')
+                        },
+                        {
+                            path: 'rates',
+                            name: 'Rates',
+                            component: () => import('@/views/pages/Maintenance/Rates.vue')
+                        }
+                    ]
+                },
+                {
+                    path: 'manage-users',
+                    name: 'Manage Users',
+                    children: [
+                        {
+                            path: 'admin',
+                            name: 'Admin',
+                            component: () => import('@/views/pages/Users/Admin.vue')
+                        },
+                        {
+                            path: 'team-leader',
+                            name: 'Team Leader',
+                            component: () => import('@/views/pages/Users/ManageTeamLeader.vue')
+                        },
+                        {
+                            path: 'registered-users',
+                            name: 'Registered Users',
+                            component: () => import('@/views/pages/Users/RegisteredUser.vue')
+                        },
+                        {
+                            path: 'registered-attendant',
+                            name: 'Registered Attendant',
+                            component: () => import('@/views/pages/Users/RegisteredAttendant.vue')
+                        }
+                    ]
+                },
+                {
+                    path: 'reports',
+                    name: 'Reports',
+                    children: [
+                        {
+                            path: 'completed-booking',
+                            name: 'Completed Booking',
+                            component: () => import('@/views/pages/Report/CompletedBooking.vue')
+                        },
+                        {
+                            path: 'online-payment',
+                            name: 'Online Payment',
+                            component: () => import('@/views/pages/Report/OnlinePayment.vue')
+                        },
+                        {
+                            path: 'manual-payment',
+                            name: 'Manual Payment',
+                            component: () => import('@/views/pages/Report/ManualPayment.vue')
+                        },
+                        {
+                            path: 'incident-report',
+                            name: 'Incident Report',
+                            component: () => import('@/views/pages/Report/IncidentReport.vue')
+                        }
+                    ]
+                },
+                {
                     path: '/uikit/formlayout',
                     name: 'formlayout',
                     component: () => import('@/views/uikit/FormLayout.vue')

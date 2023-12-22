@@ -2,7 +2,7 @@
 import { useLayout } from '@/layout/composables/layout';
 import { computed, onMounted, ref } from 'vue';
 import { checkTheme } from '@/service/layout';
-import { isSignedIn, signInUser } from '@/service/supabase';
+import { isSignedIn, signInUser } from '@/service/supabase/supabase';
 import { useRouter } from 'vue-router';
 import DarkImageLogo from '@/assets/images/auto-park-for-dark.png';
 import LightImageLogo from '@/assets/images/auto-park-for-light.png';
@@ -30,6 +30,7 @@ async function SignIn() {
         return;
     }
 
+    toast.add({ severity: 'success', summary: 'Success', detail: 'Login successful', life: 3000 });
     await router.push('/');
 }
 

@@ -4,6 +4,9 @@ import { useLayout } from '@/layout/composables/layout';
 import { useRouter } from 'vue-router';
 import DarkImageLogo from '@/assets/images/auto-park-for-dark.png';
 import LightImageLogo from '@/assets/images/auto-park-for-light.png';
+import ProfileMenu from '@/layout/AppTopBarComponents/ProfileMenu.vue';
+
+defineEmits(['change-theme']);
 
 const { layoutConfig, onMenuToggle } = useLayout();
 const outsideClickListener = ref(null);
@@ -76,18 +79,16 @@ const isOutsideClicked = (event) => {
         </button>
 
         <div class="layout-topbar-menu" :class="topbarMenuClasses">
-            <button @click="onTopBarMenuButton()" class="p-link layout-topbar-button">
-                <i class="pi pi-calendar"></i>
-                <span>Calendar</span>
-            </button>
-            <button @click="onTopBarMenuButton()" class="p-link layout-topbar-button">
-                <i class="pi pi-user"></i>
-                <span>Profile</span>
-            </button>
-            <button @click="onSettingsClick()" class="p-link layout-topbar-button">
-                <i class="pi pi-cog"></i>
-                <span>Settings</span>
-            </button>
+            <ProfileMenu />
+            <Button
+                aria-controls="overlay_menu"
+                aria-haspopup="true"
+                class="p-link layout-topbar-button"
+                @click="$emit('change-theme')"
+            >
+                <i class="pi pi-palette"></i>
+                <span>Theme</span>
+            </Button>
         </div>
     </div>
 </template>
