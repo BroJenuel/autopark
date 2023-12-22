@@ -19,3 +19,15 @@ export const changeTheme = (theme, mode) => {
     });
     linkElement.parentNode.insertBefore(cloneLinkElement, linkElement.nextSibling);
 }
+
+/**
+ * To Be used when mounting or checking theme
+ */
+export const checkTheme = () => {
+    const savedTheme = SnapStorage.get('auto-park-theme');
+    if (savedTheme) {
+        changeTheme(savedTheme.theme, savedTheme.mode);
+    } else {
+        changeTheme('arya-orange', 'dark');
+    }
+}

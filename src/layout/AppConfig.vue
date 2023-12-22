@@ -7,7 +7,7 @@ import SnapStorage from 'snap-storage'
 
 import { onMounted, ref } from 'vue';
 import { useLayout } from '@/layout/composables/layout';
-import { changeTheme } from '@/service/layout';
+import { changeTheme, checkTheme } from '@/service/layout';
 
 defineProps({
     simple: {
@@ -37,12 +37,7 @@ const applyScale = () => {
 };
 
 onMounted(() => {
-    const savedTheme = SnapStorage.get('auto-park-theme');
-    if (savedTheme) {
-        changeTheme(savedTheme.theme, savedTheme.mode);
-    } else {
-        changeTheme('arya-orange', 'dark');
-    }
+    checkTheme();
 })
 </script>
 

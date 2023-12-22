@@ -2,9 +2,10 @@
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
 import { useLayout } from '@/layout/composables/layout';
 import { useRouter } from 'vue-router';
+import DarkImageLogo from '@/assets/images/auto-park-for-dark.png';
+import LightImageLogo from '@/assets/images/auto-park-for-light.png';
 
 const { layoutConfig, onMenuToggle } = useLayout();
-
 const outsideClickListener = ref(null);
 const topbarMenuActive = ref(false);
 const router = useRouter();
@@ -18,7 +19,7 @@ onBeforeUnmount(() => {
 });
 
 const logoUrl = computed(() => {
-    return `layout/images/auto-park-for-${layoutConfig.darkTheme.value ? 'dark' : 'light'}.png`;
+    return layoutConfig.darkTheme.value ? DarkImageLogo : LightImageLogo;
 });
 
 const onTopBarMenuButton = () => {
