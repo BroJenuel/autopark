@@ -22,11 +22,18 @@ const logoUrl = computed(() => {
 });
 
 async function SignIn() {
+    showError.value = false;
+    if (!email.value || !password.value) {
+        showError.value = true;
+        showErrorMessage.value = 'Please enter email and password';
+        return;
+    }
+
     const { error } = await signInUser(email.value, password.value);
 
     if (error) {
-        showError.value = true;
-        showErrorMessage.value = error.message;
+        console.log('error')
+        toast.add({ severity: 'error', summary: 'Error', detail: error.message, life: 8000 });
         return;
     }
 
@@ -47,6 +54,7 @@ onMounted(async () => {
     <div class="flex align-items-center justify-content-center min-h-screen min-w-screen overflow-hidden">
         <div class="flex flex-column align-items-center justify-content-center">
             <div
+                class="my-3"
                 style="border-radius: 56px; padding: 0.3rem; background: linear-gradient(180deg, var(--primary-color) 10%, rgba(33, 150, 243, 0) 30%)">
                 <div class="w-full surface-card py-8 px-5 sm:px-8" style="border-radius: 53px">
                     <div class="text-center mb-5">
@@ -59,7 +67,7 @@ onMounted(async () => {
                         <label class="block text-900 text-xl font-medium mb-2" for="email1">Email</label>
                         <InputText id="email1" v-model="email" class="w-full md:w-30rem mb-5"
                                    placeholder="Email address"
-                                   style="padding: 1rem" type="text" />
+                                   style="padding: 1rem" type="text" @update:modelValue="showError = false" />
 
                         <label class="block text-900 font-medium text-xl mb-2" for="password1">Password</label>
                         <Password
@@ -71,6 +79,7 @@ onMounted(async () => {
                             class="w-full mb-3"
                             inputClass="w-full"
                             placeholder="Password"
+                            @update:modelValue="showError = false"
                         ></Password>
 
                         <div class="flex align-items-center justify-content-between mb-5 gap-5">
@@ -81,7 +90,9 @@ onMounted(async () => {
                             <a class="font-medium no-underline ml-2 text-right cursor-pointer"
                                style="color: var(--primary-color)">Forgot password?</a>
                         </div>
-                        <Button class="w-full p-3 text-xl" label="Sign In" @click="SignIn()"></Button>
+                        <Button class="w-full p-3 text-xl mb-2" label="Sign In" @click="SignIn()"></Button>
+                        <Button class="w-full p-3 text-xl" label="Create Account" text
+                                @click="router.push('/auth/register')" />
                     </div>
                 </div>
             </div>

@@ -1,24 +1,21 @@
-import { createClient } from "@supabase/supabase-js";
-import SnapStorage from 'snap-storage';
+import { createClient } from '@supabase/supabase-js';
 import { createUser } from '@/service/supabase/table/user_details';
+import { userStore } from '@/store/userStore';
 
 export const userStorageKey = 'autopark-user';
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 const supabaseSecretKey = import.meta.env.VITE_SUPABASE_SECRET_KEY;
+
 // Create a single supabase client for interacting with your database
 export const supabaseClient = createClient(supabaseUrl, supabaseAnonKey);
 export const supabaseSecretClient = createClient(supabaseUrl, supabaseSecretKey);
 
 export const signInUser = async (email, password) => {
-    const response = await supabaseClient.auth.signInWithPassword({
+    return await supabaseClient.auth.signInWithPassword({
         email: email,
         password: password,
     });
-
-    if (response.error) throw response.error.message;
-
-    return response;
 };
 
 export const signOutUser = async () => {
@@ -27,10 +24,30 @@ export const signOutUser = async () => {
     return true;
 }
 
-export const isSignedIn = async () => {
+export const signUpUser = async (data) => {
+    const userMetadata = JSON.parse(JSON.stringify(data));
+    delete userMetadata['role'];
+    delete userMetadata['password'];
+
+    const { error } = await supabaseClient.auth.signUp({
+        email: data.email,
+        password: data.password,
+        options: {
+            data: userMetadata
+        }
+    });
+    if (error) throw error.message;
+    return true;
+}
+
+export const isSignedIn = async (returnBoolean = true) => {
     const {data, error} = await supabaseClient.auth.getSession();
     if (error || !data || !data.session) return false;
-    return !!data.session;
+
+    const user = userStore();
+    user.session = data.session;
+
+    return returnBoolean ? !!data.session : data.session;
 }
 
 export const user = {
