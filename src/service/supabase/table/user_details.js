@@ -1,14 +1,30 @@
-import { supabaseClient } from "./../supabase"
+import { supabaseClient, supabaseSecretClient } from './../supabase';
 
-export const insert = async (data) => {
-    const { data, error } = await supabaseClient
-        .from('user_details')
-        .insert([
-            { some_column: 'someValue', other_column: 'otherValue' },
-        ])
-        .select()
+export const createUser = async (data) => {
+    const availableRules = {
+        'admin': 'service_role',
+        'driver': 'authenticated',
+        'parking_attendant': 'authenticated'
+    }
 
-    if (error) throw error.message
+    const userMetaData = JSON.parse(JSON.stringify(data));
+    delete userMetaData['role'];
+    delete userMetaData['password'];
 
-    return data;
+    const newUser = await supabaseSecretClient.auth.admin.createUser({
+        email: data.email,
+        password: data.password,
+        email_confirm: true,
+        app_metadata: {
+            provider: 'email',
+            providers: ['email'],
+            role: data.role
+        },
+        user_metadata: userMetaData,
+        role: availableRules[data.role]
+    })
+
+    if (newUser.error) throw newUser.error.message;
+
+    return newUser.data;
 }
