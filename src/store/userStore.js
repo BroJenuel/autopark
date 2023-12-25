@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
 
-export const userStore = defineStore('user',() => {
+export const useUserStore = defineStore('user',() => {
     const session = ref(null);
     return {
         session

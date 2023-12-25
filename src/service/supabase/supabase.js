@@ -1,6 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import { createUser } from '@/service/supabase/table/user_details';
-import { userStore } from '@/store/userStore';
+import { useUserStore } from '@/store/userStore';
 
 export const userStorageKey = 'autopark-user';
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
@@ -44,7 +44,7 @@ export const isSignedIn = async (returnBoolean = true) => {
     const {data, error} = await supabaseClient.auth.getSession();
     if (error || !data || !data.session) return false;
 
-    const user = userStore();
+    const user = useUserStore();
     user.session = data.session;
 
     return returnBoolean ? !!data.session : data.session;

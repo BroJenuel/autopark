@@ -71,10 +71,13 @@ const router = createRouter({
                             next({ name: 'login' });
                         } else {
 
-                            if (signedIn.user.role !== 'service_role') {
-                                next({ name: 'dashboard' });
+                            if (signedIn.user.role === 'service_role' || signedIn.user.role === 'supabase_admin' || signedIn.user.role === 'admin') {
+                                next();
+                                return;
                             }
-                            next();
+
+                            next({ name: 'dashboard' });
+
                         }
                     }
                 },
@@ -88,10 +91,12 @@ const router = createRouter({
                             next({ name: 'login' });
                         } else {
 
-                            if (signedIn.user.role !== 'service_role') {
-                                next({ name: 'dashboard' });
+                            if (signedIn.user.role === 'service_role' || signedIn.user.role === 'supabase_admin' || signedIn.user.role === 'admin') {
+                                next();
+                                return;
                             }
-                            next();
+
+                            next({ name: 'dashboard' });
                         }
                     }
                 },
@@ -109,10 +114,12 @@ const router = createRouter({
                                     next({ name: 'login' });
                                 } else {
 
-                                    if (signedIn.user.role !== 'service_role') {
-                                        next({ name: 'dashboard' });
+                                    if (signedIn.user.role === 'service_role' || signedIn.user.role === 'supabase_admin' || signedIn.user.role === 'admin') {
+                                        next();
+                                        return;
                                     }
-                                    next();
+
+                                    next({ name: 'dashboard' });
                                 }
                             }
                         },
@@ -126,10 +133,12 @@ const router = createRouter({
                                     next({ name: 'login' });
                                 } else {
 
-                                    if (signedIn.user.role !== 'service_role') {
-                                        next({ name: 'dashboard' });
+                                    if (signedIn.user.role === 'service_role' || signedIn.user.role === 'supabase_admin' || signedIn.user.role === 'admin') {
+                                        next();
+                                        return;
                                     }
-                                    next();
+
+                                    next({ name: 'dashboard' });
                                 }
                             }
                         }
@@ -166,10 +175,12 @@ const router = createRouter({
                             next({ name: 'login' });
                         } else {
 
-                            if (signedIn.user.role !== 'service_role') {
-                                next({ name: 'dashboard' });
+                            if (signedIn.user.role === 'service_role' || signedIn.user.role === 'supabase_admin' || signedIn.user.role === 'admin') {
+                                next();
+                                return;
                             }
-                            next();
+
+                            next({ name: 'dashboard' });
                         }
                     }
                 },
@@ -204,10 +215,12 @@ const router = createRouter({
                             next({ name: 'login' });
                         } else {
 
-                            if (signedIn.user.role !== 'service_role') {
-                                next({ name: 'dashboard' });
+                            if (signedIn.user.role === 'service_role' || signedIn.user.role === 'supabase_admin' || signedIn.user.role === 'admin') {
+                                next();
+                                return;
                             }
-                            next();
+
+                            next({ name: 'dashboard' });
                         }
                     }
 

@@ -1,20 +1,28 @@
 <script setup>
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { signOutUser } from '@/service/supabase/supabase';
 import { useToast } from 'primevue/usetoast';
 import { Loading } from 'notiflix';
+import { useUserStore } from '@/store/userStore';
 
+const userStore = useUserStore();
 const route = useRoute();
 const toast = useToast();
 const router = useRouter();
 const menu = ref();
-const items = ref([
+const accountLabel = computed(() => {
+    const first_name = userStore.session && userStore.session.user && userStore.session.user.user_metadata && userStore.session.user.user_metadata.first_name ? userStore.session.user.user_metadata.first_name : 'Profile';
+    const last_name = userStore.session && userStore.session.user && userStore.session.user.user_metadata && userStore.session.user.user_metadata.last_name ? userStore.session.user.user_metadata.last_name : '';
+
+    return first_name && last_name ? `${first_name} ${last_name}` : userStore.session.user.email;
+})
+const items = computed(() => [
     {
         label: 'Profile',
         items: [
             {
-                label: 'Account',
+                label: accountLabel,
                 icon: 'pi pi-user',
                 command: () => {
                     router.push('/profile');
