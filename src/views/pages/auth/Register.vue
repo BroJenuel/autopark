@@ -64,7 +64,7 @@ async function signUp() {
     }
 
     toast.add({ severity: 'success', summary: 'Success', detail: 'Login successful', life: 3000 });
-    await router.push('/dashboard');
+    await router.push('/');
 }
 
 onMounted(async () => {

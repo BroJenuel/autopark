@@ -71,6 +71,7 @@ async function submit() {
                 image: uploadImage,
                 type: form.value.type
             })
+            .eq('id', form.value.id)
             .select()
         : await supabaseClient
             .from('events_announcements')
