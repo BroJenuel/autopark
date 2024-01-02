@@ -3,7 +3,10 @@ import { ref } from 'vue';
 import { createParkingSlot, updateParkingSlot } from '@/service/supabase/table/parking_slot';
 import { Loading } from 'notiflix';
 import { removeEmpty } from '@/utils/objects';
+import { supabaseClient } from '@/service/supabase/supabase';
+import { useToast } from 'primevue/usetoast';
 
+const toast = useToast();
 const emits = defineEmits(['stored']);
 const showModal = ref(false);
 const form = ref({
@@ -21,6 +24,7 @@ const statusOptions = [
     { name: 'Not Available', code: 'not_available' }
 ];
 
+const streetOptionLoading = ref(false);
 const streets = ref([
     { name: 'Harrison Road', code: 'Harrison Road' },
     { name: 'Kamog', code: 'Kamog' },
@@ -28,6 +32,22 @@ const streets = ref([
     { name: 'Session Road Up', code: 'Session Road Up' },
     { name: 'Upper Session Road', code: 'Upper Session Road' }
 ]);
+
+async function getStreets() {
+    streetOptionLoading.value = true;
+    const { data, error } = await supabaseClient
+        .from('streets')
+        .select();
+
+    streetOptionLoading.value = false;
+
+    if (error) {
+        toast.add({ severity: 'error', summary: 'Error', detail: error.message, life: 3000 });
+        return;
+    }
+
+    streets.value = data.map(d => ({ name: d.name, code: d.name }));
+}
 
 function toggleModal(data = {
     id: null,
@@ -39,6 +59,7 @@ function toggleModal(data = {
 }) {
     if (data != null) form.value = data;
     showModal.value = !showModal.value;
+    getStreets();
 }
 
 
@@ -79,11 +100,12 @@ defineExpose({
                 <InputText v-model="form.area" placeholder="ex. example@gmail.com" required />
             </div>
             <div class="flex flex-column gap-2 mb-3">
-                <label>Street</label>
+                <label>Street <RouterLink to="/maintenance/street" class="text-blue-500">Manage Streets</RouterLink></label>
                 <Dropdown
                     v-model="form.street"
                     :options="streets"
                     class="w-full md:w-14rem"
+                    :loading="streetOptionLoading"
                     optionLabel="name"
                     optionValue="code"
                     placeholder="Select a City"
@@ -105,7 +127,7 @@ defineExpose({
                     :options="statusOptions"
                     class="w-full md:w-14rem"
                     optionLabel="name"
-                    optionValue="code"
+                    optionValue="name"
                     placeholder="Select Status"
                     required
                 />
