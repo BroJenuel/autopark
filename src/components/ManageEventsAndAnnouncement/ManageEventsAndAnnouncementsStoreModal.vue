@@ -13,7 +13,7 @@ const form = ref({
     description: null,
     image: null,
     type: null,
-    status: null
+    status: 'active'
 });
 
 const eventsAnnouncementTypeOptions = [
@@ -35,7 +35,6 @@ function toggleModal(data = {
     status: 'active'
 }) {
     if (data != null) form.value = data;
-    console.log(form.value)
     showModal.value = !showModal.value;
 }
 
@@ -62,25 +61,23 @@ async function submit() {
             .upload('images/events/' + (Date.now()) + '-' + getFileExtension(form.value.image.name), form.value.image)
         : null;
 
+    const dataParams = {
+        title: form.value.title,
+        description: form.value.description,
+        image: uploadImage,
+        type: form.value.type,
+        status: form.value.status
+    };
+
     // then add the data
     const addEventAnnouncement = isUpdate ? await supabaseClient
             .from('events_announcements')
-            .update({
-                title: form.value.title,
-                description: form.value.description,
-                image: uploadImage,
-                type: form.value.type
-            })
+            .update(dataParams)
             .eq('id', form.value.id)
             .select()
         : await supabaseClient
             .from('events_announcements')
-            .insert({
-                title: form.value.title,
-                description: form.value.description,
-                image: uploadImage,
-                type: form.value.type
-            })
+            .insert(dataParams)
             .select();
 
     if (addEventAnnouncement.error) {
@@ -124,6 +121,7 @@ defineExpose({
             <div class="flex flex-column gap-2 mb-3">
                 <label>Select Image</label>
                 <FileUpload accept="image/*" mode="basic" @select="customBase64Uploader"   />
+                <img v-if="form.image && form.image.data" :src="`https://hqymkslkcmsenuymkgej.supabase.co/storage/v1/object/public/${form.image.data.fullPath}`"  width="150px" alt=""/>
             </div>
             <div class="flex flex-column gap-2 mb-3">
                 <label>Type</label>
