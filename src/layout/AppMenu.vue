@@ -59,6 +59,46 @@ const adminModal = [
     }
 ];
 
+const teamLeader = [
+    {
+        label: 'Main',
+        items: [
+            { label: 'Dashboard', icon: 'pi pi-fw pi-home', to: '/' },
+            { label: 'Events', icon: 'pi pi-fw pi-calendar', to: '/events' },
+            { label: 'Announcements', icon: 'pi pi-fw pi-bell', to: '/announcement' },
+            { label: 'Incident Report', icon: 'pi pi-fw pi-file', to: '/reports/incident-report' },
+            {
+                label: 'Parking',
+                icon: 'pi pi-fw pi-car',
+                items: [
+                    { label: 'Manage Slots', icon: 'pi pi-fw pi-map', to: '/parking-slot' }
+                ]
+            },
+        ]
+    },
+    {
+        label: 'Users',
+        items: [
+            { label: 'Registered User', icon: 'pi pi-fw pi-user', to: '/manage-users/registered-users' },
+            { label: 'Registered Attendant', icon: 'pi pi-fw pi-user', to: '/manage-users/registered-attendant' }
+        ]
+    },
+    {
+        label: 'Reports',
+        items: [
+            {
+                label: 'Reports',
+                icon: 'pi pi-fw pi-file',
+                items: [
+                    { label: 'Completed Booking', icon: 'pi pi-fw pi-file', to: '/reports/completed-booking' },
+                    { label: 'Online Payment', icon: 'pi pi-fw pi-file', to: '/reports/online-payment' },
+                    { label: 'Manual Payment', icon: 'pi pi-fw pi-file', to: '/reports/manual-payment' },
+                ]
+            }
+        ]
+    }
+];
+
 const driverMenu = [
     {
         label: 'Main',
@@ -91,14 +131,18 @@ const parkingAttendantMenu = [
 const model = ref([]);
 
 onMounted(() => {
-    const role = user.session.user.role;
+    const userSession = user.session;
+    const role = userSession.user.app_metadata.role;
     if (role === 'admin' || role === 'service_role' || role === 'supabase_admin') {
         model.value = adminModal;
     } else if (role === 'driver' || role === 'authenticated') {
         model.value = driverMenu;
     } else if (role === 'parking_attendant') {
         model.value = parkingAttendantMenu;
-
+    } else if (role === 'team_leader') {
+        model.value = teamLeader;
+    } else {
+        model.value = driverMenu;
     }
 })
 </script>

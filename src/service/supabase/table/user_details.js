@@ -4,7 +4,8 @@ export const createUser = async (data) => {
     const availableRules = {
         'admin': 'service_role',
         'driver': 'authenticated',
-        'parking_attendant': 'authenticated'
+        'parking_attendant': 'authenticated',
+        'team_leader': 'authenticated'
     };
 
     const userMetaData = JSON.parse(JSON.stringify(data));

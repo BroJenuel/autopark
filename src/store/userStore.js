@@ -1,9 +1,12 @@
 import { defineStore } from 'pinia';
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 
 export const useUserStore = defineStore('user',() => {
     const session = ref(null);
     return {
-        session
+        session,
+        role: computed(() => {
+            return session.value?.user?.app_metadata?.role ?? 'driver';
+        })
     }
 })

@@ -71,7 +71,7 @@ const router = createRouter({
                             next({ name: 'login' });
                         } else {
 
-                            if (signedIn.user.role === 'service_role' || signedIn.user.role === 'supabase_admin' || signedIn.user.role === 'admin') {
+                            if (signedIn.user.role === 'service_role' || signedIn.user.role === 'supabase_admin' || signedIn.user.role === 'admin' || signedIn.user.app_metadata.role === 'team_leader') {
                                 next();
                                 return;
                             }
@@ -151,38 +151,81 @@ const router = createRouter({
                         {
                             path: 'admin',
                             name: 'Admin',
-                            component: () => import('@/views/pages/Users/Admin.vue')
+                            component: () => import('@/views/pages/Users/Admin.vue'),
+                            beforeEnter: async (to, from, next) => {
+                                const signedIn = await isSignedIn(false);
+                                if (!signedIn) {
+                                    next({ name: 'login' });
+                                } else {
+
+                                    if (signedIn.user.role === 'service_role' || signedIn.user.role === 'supabase_admin' || signedIn.user.role === 'admin') {
+                                        next();
+                                        return;
+                                    }
+
+                                    next({ name: 'dashboard' });
+                                }
+                            }
                         },
                         {
                             path: 'team-leader',
                             name: 'Team Leader',
-                            component: () => import('@/views/pages/Users/ManageTeamLeader.vue')
+                            component: () => import('@/views/pages/Users/ManageTeamLeader.vue'),
+                            beforeEnter: async (to, from, next) => {
+                                const signedIn = await isSignedIn(false);
+                                if (!signedIn) {
+                                    next({ name: 'login' });
+                                } else {
+
+                                    if (signedIn.user.role === 'service_role' || signedIn.user.role === 'supabase_admin' || signedIn.user.role === 'admin') {
+                                        next();
+                                        return;
+                                    }
+
+                                    next({ name: 'dashboard' });
+                                }
+                            }
                         },
                         {
                             path: 'registered-users',
                             name: 'Registered Users',
-                            component: () => import('@/views/pages/Users/RegisteredUser.vue')
+                            component: () => import('@/views/pages/Users/RegisteredUser.vue'),
+                            beforeEnter: async (to, from, next) => {
+                                const signedIn = await isSignedIn(false);
+                                if (!signedIn) {
+                                    next({ name: 'login' });
+                                } else {
+
+                                    if (signedIn.user.role === 'service_role' || signedIn.user.role === 'supabase_admin' || signedIn.user.role === 'admin' || signedIn.user.app_metadata.role === 'team_leader') {
+                                        next();
+                                        return;
+                                    }
+
+                                    next({ name: 'dashboard' });
+                                }
+                            }
                         },
                         {
                             path: 'registered-attendant',
                             name: 'Registered Attendant',
-                            component: () => import('@/views/pages/Users/RegisteredAttendant.vue')
+                            component: () => import('@/views/pages/Users/RegisteredAttendant.vue'),
+                            beforeEnter: async (to, from, next) => {
+                                const signedIn = await isSignedIn(false);
+                                if (!signedIn) {
+                                    next({ name: 'login' });
+                                } else {
+
+                                    if (signedIn.user.role === 'service_role' || signedIn.user.role === 'supabase_admin' || signedIn.user.role === 'admin' || signedIn.user.app_metadata.role === 'team_leader') {
+                                        next();
+                                        return;
+                                    }
+
+                                    next({ name: 'dashboard' });
+                                }
+                            }
                         }
                     ],
-                    beforeEnter: async (to, from, next) => {
-                        const signedIn = await isSignedIn(false);
-                        if (!signedIn) {
-                            next({ name: 'login' });
-                        } else {
 
-                            if (signedIn.user.role === 'service_role' || signedIn.user.role === 'supabase_admin' || signedIn.user.role === 'admin') {
-                                next();
-                                return;
-                            }
-
-                            next({ name: 'dashboard' });
-                        }
-                    }
                 },
                 {
                     path: 'reports',
@@ -215,7 +258,7 @@ const router = createRouter({
                             next({ name: 'login' });
                         } else {
 
-                            if (signedIn.user.role === 'service_role' || signedIn.user.role === 'supabase_admin' || signedIn.user.role === 'admin') {
+                            if (signedIn.user.role === 'service_role' || signedIn.user.role === 'supabase_admin' || signedIn.user.role === 'admin' || signedIn.user.app_metadata.role === 'team_leader') {
                                 next();
                                 return;
                             }

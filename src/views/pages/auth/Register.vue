@@ -2,7 +2,7 @@
 import { useLayout } from '@/layout/composables/layout';
 import { computed, onMounted, ref } from 'vue';
 import { checkTheme } from '@/service/layout';
-import { isSignedIn, signInUser, signUpUser } from '@/service/supabase/supabase';
+import { isSignedIn, signUpUser, supabaseClient } from '@/service/supabase/supabase';
 import { useRouter } from 'vue-router';
 import DarkImageLogo from '@/assets/images/auto-park-for-dark.png';
 import LightImageLogo from '@/assets/images/auto-park-for-light.png';
@@ -63,6 +63,18 @@ async function signUp() {
         return;
     }
 
+    const theUserData = JSON.parse(JSON.stringify(form.value));
+    delete theUserData['password'];
+    const theUser = await supabaseClient.auth.getUser();
+
+    await supabaseClient
+        .from('user_profile')
+        .upsert({
+            user_id: theUser.data.user.id,
+            data: theUserData,
+            role: 'driver'
+        }, { onConflict: 'user_id' });
+
     toast.add({ severity: 'success', summary: 'Success', detail: 'Login successful', life: 3000 });
     await router.push('/');
 }
@@ -101,7 +113,8 @@ onMounted(async () => {
                             </div>
                             <div class="flex flex-column gap-2 mb-3">
                                 <label>Password</label>
-                                <Password v-model="form.password" placeholder="ex. 09503244478" style="display: grid" required />
+                                <Password v-model="form.password" placeholder="ex. 09503244478" required
+                                          style="display: grid" />
                             </div>
                         </div>
 

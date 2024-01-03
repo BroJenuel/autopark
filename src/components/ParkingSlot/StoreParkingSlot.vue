@@ -5,7 +5,9 @@ import { Loading } from 'notiflix';
 import { removeEmpty } from '@/utils/objects';
 import { supabaseClient } from '@/service/supabase/supabase';
 import { useToast } from 'primevue/usetoast';
+import { useUserStore } from '@/store/userStore';
 
+const userStore = useUserStore();
 const toast = useToast();
 const emits = defineEmits(['stored']);
 const showModal = ref(false);
@@ -25,13 +27,7 @@ const statusOptions = [
 ];
 
 const streetOptionLoading = ref(false);
-const streets = ref([
-    { name: 'Harrison Road', code: 'Harrison Road' },
-    { name: 'Kamog', code: 'Kamog' },
-    { name: 'Session Road', code: 'Session Road' },
-    { name: 'Session Road Up', code: 'Session Road Up' },
-    { name: 'Upper Session Road', code: 'Upper Session Road' }
-]);
+const streets = ref([]);
 
 async function getStreets() {
     streetOptionLoading.value = true;
@@ -67,7 +63,6 @@ async function submit() {
     const isUpdate = form.value.id != null;
 
     const params = removeEmpty(form.value);
-    console.log(form.value);
 
     Loading.standard(form.value.id ? 'Updating Parking Slot' : 'Adding New Parking Slot');
 
@@ -75,6 +70,12 @@ async function submit() {
 
     if (!isUpdate) parkingSlot = await createParkingSlot(params);
     else parkingSlot = await updateParkingSlot(params);
+
+    if (parkingSlot.error) {
+        toast.add({ severity: 'error', summary: 'Error', detail: parkingSlot.error.message, life: 3000 });
+        Loading.remove();
+        return;
+    }
 
     emits('stored', parkingSlot);
     Loading.remove();
@@ -100,7 +101,7 @@ defineExpose({
                 <InputText v-model="form.area" placeholder="ex. example@gmail.com" required />
             </div>
             <div class="flex flex-column gap-2 mb-3">
-                <label>Street <RouterLink to="/maintenance/street" class="text-blue-500">Manage Streets</RouterLink></label>
+                <label>Street <RouterLink v-if="userStore.role === 'admin'" to="/maintenance/street" class="text-blue-500">Manage Streets</RouterLink></label>
                 <Dropdown
                     v-model="form.street"
                     :options="streets"
