@@ -6,7 +6,9 @@ import { removeEmpty } from '@/utils/objects';
 import { supabaseClient } from '@/service/supabase/supabase';
 import { useToast } from 'primevue/usetoast';
 import { useUserStore } from '@/store/userStore';
+import GetLatAndLongInMap from '@/components/ParkingSlot/GetLatAndLongInMap.vue';
 
+const GetLatAndLongInMapRef = ref();
 const userStore = useUserStore();
 const toast = useToast();
 const emits = defineEmits(['stored']);
@@ -88,6 +90,10 @@ defineExpose({
 </script>
 
 <template>
+    <GetLatAndLongInMap
+        ref="GetLatAndLongInMapRef"
+        @selected="({ latitude, longitude }) => (form.latitude = latitude, form.longitude = longitude)"
+    />
     <Dialog
         v-model:visible="showModal"
         :breakpoints="{ '1199px': '75vw', '575px': '90vw' }"
@@ -101,12 +107,16 @@ defineExpose({
                 <InputText v-model="form.area" placeholder="ex. example@gmail.com" required />
             </div>
             <div class="flex flex-column gap-2 mb-3">
-                <label>Street <RouterLink v-if="userStore.role === 'admin'" to="/maintenance/street" class="text-blue-500">Manage Streets</RouterLink></label>
+                <label>Street
+                    <RouterLink v-if="userStore.role === 'admin'" class="text-blue-500" to="/maintenance/street">Manage
+                        Streets
+                    </RouterLink>
+                </label>
                 <Dropdown
                     v-model="form.street"
+                    :loading="streetOptionLoading"
                     :options="streets"
                     class="w-full md:w-14rem"
-                    :loading="streetOptionLoading"
                     optionLabel="name"
                     optionValue="code"
                     placeholder="Select a City"
@@ -114,7 +124,9 @@ defineExpose({
                 />
             </div>
             <div class="flex flex-column gap-2 mb-3">
-                <label>Latitude</label>
+                <label>Latitude
+                    <Button size="small" class="py-0 px-1" label="Set Lat & Long" @click="GetLatAndLongInMapRef.toggleModal()" />
+                </label>
                 <InputText v-model="form.latitude" placeholder="ex. 16.411697048290645" required />
             </div>
             <div class="flex flex-column gap-2 mb-3">
