@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
-import { createUser } from '@/service/supabase/table/user_details';
+import { createUser, updateUser } from '@/service/supabase/table/user_details';
 import { useUserStore } from '@/store/userStore';
 
 export const userStorageKey = 'autopark-user';
@@ -52,6 +52,7 @@ export const isSignedIn = async (returnBoolean = true) => {
 
 export const user = {
     create: createUser,
+    update: updateUser
 }
 
 export const me = {

@@ -9,6 +9,7 @@ const props = defineProps({
     role: String
 });
 const form = ref({
+    id: null,
     email: null,
     password: null,
     contact_number: null,
@@ -28,7 +29,29 @@ const form = ref({
 
 const showModal = ref(false);
 
-function toggleModal() {
+function toggleModal(data = null) {
+    if (!data) {
+        toast.add({ severity: 'error', summary: 'Error', detail: 'User is required', life: 3000});
+        return
+    }
+    form.value = {
+        id: data.user_id,
+        email: data.email,
+        password: null,
+        contact_number: data.contact_number,
+        first_name: data.first_name,
+        middle_name: data.middle_name,
+        last_name: data.last_name,
+        suffix_name: data.suffix_name,
+        birthday: data.birthday,
+        region: data.region,
+        province: data.province,
+        city: data.city,
+        barangay: data.barangay,
+        street: data.street,
+        role: data.role
+    }
+
     showModal.value = !showModal.value;
 }
 
@@ -54,24 +77,43 @@ async function submit() {
         Loading.standard('saving user');
         const data = JSON.parse(JSON.stringify(form.value));
 
-        const storedUser = await user.create(data);
-        emit('userStored', storedUser);
+        const storedUser = await user.update(data);
+
+        form.value = {
+            id: null,
+            email: null,
+            password: null,
+            contact_number: null,
+            first_name: null,
+            middle_name: null,
+            last_name: null,
+            suffix_name: null,
+            birthday: null,
+            region: null,
+            province: null,
+            city: null,
+            barangay: null,
+            street: null,
+            role: props.role
+        };
+
+        showModal.value = false;
+        emit('userUpdated', storedUser);
     } catch (error) {
         toast.add({ severity: 'error', summary: 'Error', detail: error });
     }
     Loading.remove();
-    toggleModal();
-
 }
 
-const emit = defineEmits(['userStored']);
+const emit = defineEmits(['userUpdated']);
+
 defineExpose({
     toggleModal
 });
 </script>
 
 <template>
-    <Dialog v-model:visible="showModal" :breakpoints="{ '1199px': '75vw', '575px': '90vw' }" :header="`Add New ${role ? role.split('_').map((string) => {
+    <Dialog v-model:visible="showModal" :breakpoints="{ '1199px': '75vw', '575px': '90vw' }" :header="`Update ${role ? role.split('_').map((string) => {
         return string.charAt(0).toUpperCase() + string.slice(1);
     }).join(' ') : ''}`" :style="{ width: '50rem' }" modal>
 
@@ -88,7 +130,7 @@ defineExpose({
                 </div>
                 <div class="flex flex-column gap-2 mb-3">
                     <label>Password</label>
-                    <Password v-model="form.password" placeholder="ex. 09503244478" style="display: grid" required />
+                    <Password v-model="form.password" placeholder="ex. 09503244478" style="display: grid" />
                 </div>
             </div>
 

@@ -1,35 +1,18 @@
 <script setup>
 import { onMounted, ref } from 'vue';
-// import { CustomerService } from '@/service/CustomerService';
+import { FilterMatchMode } from 'primevue/api';
+import { supabaseClient, supabaseSecretClient } from '@/service/supabase/supabase';
+import dayjs from 'dayjs';
 
 onMounted(() => {
-    // loading.value = true;
-
-    lazyParams.value = {
-        first: dt.value.first,
-        rows: dt.value.rows,
-        sortField: null,
-        sortOrder: null,
-        filters: filters.value
-    };
-
     loadLazyData();
 });
 
-const dt = ref();
 const loading = ref(false);
-const totalRecords = ref(0);
-const customers = ref();
-const selectedCustomers = ref();
-const selectAll = ref(false);
-const first = ref(0);
+const usersData = ref([]);
 const filters = ref({
-    'name': { value: '', matchMode: 'contains' },
-    'country.name': { value: '', matchMode: 'contains' },
-    'company': { value: '', matchMode: 'contains' },
-    'representative.name': { value: '', matchMode: 'contains' }
+    global: { value: null, matchMode: FilterMatchMode.CONTAINS }
 });
-const lazyParams = ref({});
 const columns = ref([
     { field: 'name', header: 'Name' },
     { field: 'country.name', header: 'Country' },
@@ -37,101 +20,98 @@ const columns = ref([
     { field: 'representative.name', header: 'Representative' }
 ]);
 
-const loadLazyData = (event) => {
-    // loading.value = true;
-    lazyParams.value = { ...lazyParams.value, first: event?.first || first.value };
+const loadLazyData = async (event) => {
+    loading.value = true;
+    const getUserProfiles = supabaseClient
+        .from('user_profile')
+        .select()
+        .limit(1000);
 
-    // CustomerService.getCustomers({ lazyEvent: JSON.stringify(lazyParams.value) }).then((data) => {
-    //     customers.value = data.customers;
-    //     totalRecords.value = data.totalRecords;
-    //     loading.value = false;
-    // });
-};
-const onPage = (event) => {
-    lazyParams.value = event;
-    loadLazyData(event);
-};
-const onSort = (event) => {
-    lazyParams.value = event;
-    loadLazyData(event);
-};
-const onFilter = (event) => {
-    lazyParams.value.filters = filters.value;
-    loadLazyData(event);
-};
-const onSelectAllChange = (event) => {
-    selectAll.value = event.checked;
+    const { data, error } = await getUserProfiles.eq('role', props.role);
 
-    if (selectAll) {
-        // CustomerService.getCustomers().then(data => {
-        //     selectAll.value = true;
-        //     selectedCustomers.value = data.customers;
-        // });
-    } else {
-        selectAll.value = false;
-        selectedCustomers.value = [];
+    loading.value = false;
+
+    if (error) {
+        toast.add({ severity: 'error', summary: 'Error', detail: error.message, life: 3000 });
+        return;
     }
+
+    usersData.value = data.map(user => ({
+        ...user,
+        ...user.data,
+        full_name: `${user.data.first_name ?? ''} ${user.data.middle_name ?? ''} ${user.data.last_name ?? ''}`,
+        client_role: getClientRole(user.role)
+    }));
+
+    console.log(usersData.value)
 };
-const onRowSelect = () => {
-    selectAll.value = selectedCustomers.value.length === totalRecords.value;
-};
-const onRowUnselect = () => {
-    selectAll.value = false;
-};
+
+function getClientRole(supabase_user_role) {
+    if (supabase_user_role === 'service_role') return 'admin';
+    if (supabase_user_role === 'authenticated') return 'driver';
+    if (supabase_user_role === 'authenticated') return 'driver';
+}
+
+const props = defineProps({
+    role: {
+        type: String,
+        default: null
+    }
+})
+
+defineEmits(['editUser']);
+
+defineExpose({
+    loadLazyData
+});
 
 </script>
 
 
 <template>
-    <DataTable ref="dt" v-model:filters="filters" v-model:selection="selectedCustomers" :first="first"
-               :globalFilterFields="['name','country.name', 'company', 'representative.name']" :loading="loading"
-               :rows="10"
-               :selectAll="selectAll"
-               :totalRecords="totalRecords" :value="customers" dataKey="id" filterDisplay="row"
-               lazy paginator
-               tableStyle="min-width: 75rem"
-               @filter="onFilter($event)" @page="onPage($event)" @sort="onSort($event)"
-               @select-all-change="onSelectAllChange" @row-select="onRowSelect" @row-unselect="onRowUnselect">
-        <Column headerStyle="width: 3rem" selectionMode="multiple"></Column>
-        <Column field="name" filterMatchMode="startsWith" header="Name" sortable>
-            <template #filter="{filterModel,filterCallback}">
-                <InputText v-model="filterModel.value" class="p-column-filter" placeholder="Search"
-                           type="text" @keydown.enter="filterCallback()" />
+    <DataTable
+        v-model:filters="filters"
+        :globalFilterFields="['name', 'id']"
+        :loading="loading"
+        :sortOrder="-1"
+        :value="usersData"
+        sortField="created_at"
+        tableStyle="min-width: 50rem"
+    >
+        <template #header>
+            <div class="flex justify-content-end">
+                <span class="p-input-icon-left">
+                    <i class="pi pi-search" />
+                    <InputText v-model="filters['global'].value" placeholder="Keyword Search" />
+                </span>
+            </div>
+        </template>
+        <Column field="created_at" header="Date Created" sortable>
+            <template #body="slotProps">
+                {{ new Date(slotProps.data.created_at).toLocaleString() }}
             </template>
         </Column>
-        <Column field="country.name" filterField="country.name" filterMatchMode="contains" header="Country"
-                sortable>
+        <Column field="user_id" header="ID" sortable></Column>
+        <Column field="full_name" header="Full Name" sortable></Column>
+        <Column field="contact_number" header="Contact Number" sortable>
             <template #body="{ data }">
-                <div class="flex align-items-center gap-2">
-                    <img :class="`flag flag-${data.country.code}`" alt="flag"
-                         src="https://primefaces.org/cdn/primevue/images/flag/flag_placeholder.png"
-                         style="width: 24px" />
-                    <span>{{ data.country.name }}</span>
-                </div>
-            </template>
-            <template #filter="{filterModel,filterCallback}">
-                <InputText v-model="filterModel.value" class="p-column-filter" placeholder="Search"
-                           type="text" @keydown.enter="filterCallback()" />
+                {{ data.contact_number ?? '-- not set --' }}
             </template>
         </Column>
-        <Column field="company" filterMatchMode="contains" header="Company" sortable>
-            <template #filter="{filterModel,filterCallback}">
-                <InputText v-model="filterModel.value" class="p-column-filter" placeholder="Search"
-                           type="text" @keydown.enter="filterCallback()" />
-            </template>
-        </Column>
-        <Column field="representative.name" filterField="representative.name" header="Representative" sortable>
+        <Column field="birthday" header="Birthdate" sortable>
             <template #body="{ data }">
-                <div class="flex align-items-center gap-2">
-                    <img :alt="data.representative.name"
-                         :src="`https://primefaces.org/cdn/primevue/images/avatar/${data.representative.image}`"
-                         style="width: 32px" />
-                    <span>{{ data.representative.name }}</span>
-                </div>
+                {{ data.birthday ? dayjs(data.birthday).format('MMMM DD, YYYY') : '-- not set --' }}
             </template>
-            <template #filter="{filterModel,filterCallback}">
-                <InputText v-model="filterModel.value" class="p-column-filter" placeholder="Search"
-                           type="text" @keydown.enter="filterCallback()" />
+        </Column>
+        <Column field="role" header="Role" sortable></Column>
+        <Column field="email" header="Email" sortable></Column>
+        <Column header="Action">
+            <template #body="slotProps">
+                <Button
+                    class="p-button-rounded p-button-success mr-2"
+                    icon="pi pi-pencil"
+                    @click="$emit('editUser', slotProps.data)"
+                />
             </template>
         </Column>
     </DataTable>
