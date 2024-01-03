@@ -24,7 +24,7 @@ const role = ref('team_leader');
                             @click="UsersTableRef.loadLazyData()" />
                 </div>
             </div>
-            <UsersTable role="team_leader" ref="UsersTableRef" @editUser="(data) => UpdateUserModalRef.toggleModal(data)" />
+            <UsersTable :role="role" ref="UsersTableRef" @editUser="(data) => UpdateUserModalRef.toggleModal(data)" />
         </template>
     </Card>
 </template>
