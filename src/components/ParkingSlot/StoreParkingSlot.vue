@@ -125,7 +125,8 @@ defineExpose({
             </div>
             <div class="flex flex-column gap-2 mb-3">
                 <label>Latitude
-                    <Button size="small" class="py-0 px-1" label="Set Lat & Long" @click="GetLatAndLongInMapRef.toggleModal()" />
+                    <Button class="py-0 px-1" label="Set Lat & Long" size="small"
+                            @click="GetLatAndLongInMapRef.toggleModal(form.latitude, form.longitude)" />
                 </label>
                 <InputText v-model="form.latitude" placeholder="ex. 16.411697048290645" required />
             </div>

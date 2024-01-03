@@ -1,38 +1,49 @@
 <script setup>
 import { ref } from 'vue';
-import L from 'leaflet'
 
 const showModal = ref(false);
-const latSelected = ref(null);
-const lngSelected = ref(null);
+const latSelected = ref(0);
+const lngSelected = ref(0);
 
-function toggleModal() {
+function toggleModal(lat, lng) {
+    latSelected.value = lat ?? 16.405950364340057;
+    lngSelected.value = lng ?? 120.59147320190415;
     showModal.value = !showModal.value;
     setTimeout(() => {
-        const mapElement = document.getElementById('map_canvas')
-
-        const map = L.map(mapElement, {
-            center: [16.405950364340057, 480.5919456481934],
-            zoom: 15
-        });
-
-        L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
-        }).addTo(map);
-
-        let marker = L.marker([16.405950364340057, 480.5919456481934]).addTo(map);
-
-        map.on('click', function(e) {
-            let lat = e.latlng.lat;
-            let lng = e.latlng.lng;
-
-            // Do something with lat and lng, like displaying them or sending them to a server.
-            console.log("Clicked at: ", lat, ",", lng);
-            marker.setLatLng([lat, lng])
-            latSelected.value = lat;
-            lngSelected.value = lng;
-        });
+        initMap();
     }, 1000);
+}
+
+function initMap() {
+    const map = new google.maps.Map(document.getElementById('map_canvas'), {
+        zoom: 17, // Initial zoom level
+        center: { lat: latSelected.value, lng: lngSelected.value }, // Center coordinates (San Francisco)
+        mapTypeControl: true,
+    });
+
+    // Disable default UI elements
+    map.setOptions({
+        disableDefaultUI: true
+    });
+
+    // Hide POI markers (optional)
+    map.data.setStyle({
+        visible: false
+    });
+
+    const marker = new google.maps.Marker({
+        position: { lat: latSelected.value, lng: lngSelected.value}, // Marker position
+        map: map, // Attach the marker to the map
+    });
+
+    map.addListener('click', function(e) {
+        const latLng = e.latLng;
+        const lat = latLng.lat();
+        const lng = latLng.lng();
+        marker.setPosition({ lat, lng });
+        latSelected.value = lat;
+        lngSelected.value = lng;
+    });
 }
 
 function selectLatLong() {
@@ -49,18 +60,20 @@ defineExpose({
 
 <template>
     <Dialog v-model:visible="showModal"
-            header="Set Mark"
-            :style="{ width: '80rem' }" modal>
+            :style="{ width: '80rem' }"
+            header="Select Parking Slot Lat & Long" modal>
         <div>
             <div v-if="showModal" id="map_canvas"></div>
         </div>
         <div class="flex mt-3 justify-content-end gap-2">
-            <Button @click="selectLatLong()" severity="primary">Select</Button>
-            <Button @click="showModal = false" severity="secondary">Close</Button>
+            <Button severity="primary" @click="selectLatLong()">Select</Button>
+            <Button severity="secondary" @click="showModal = false">Close</Button>
         </div>
     </Dialog>
 </template>
 
 <style lang="scss" scoped>
-#map_canvas { height: 70vh; }
+#map_canvas {
+    height: 70vh;
+}
 </style>
