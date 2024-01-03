@@ -9,5 +9,5 @@ export const createParkingSlot = async (data) => {
 }
 
 export const updateParkingSlot = async (data) => {
-    return supabaseClient.from('parking_slot').update(data).eq('id', data.id);
+    return supabaseClient.from('parking_slot').update(data).eq('id', data.id).select();
 }

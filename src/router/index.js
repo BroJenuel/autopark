@@ -2,6 +2,61 @@ import { createRouter, createWebHistory } from 'vue-router';
 import AppLayout from '@/layout/AppLayout.vue';
 import { isSignedIn } from '@/service/supabase/supabase';
 
+const anyoneCanAccess = async (to, from, next) => {
+    const signedIn = await isSignedIn();
+    if (!signedIn) {
+        next({ name: 'login' });
+    } else {
+        next();
+    }
+};
+
+const adminParkingAttendantTeamLeaderRoutes = async (to, from, next) => {
+    const signedIn = await isSignedIn(false);
+    if (!signedIn) {
+        next({ name: 'login' });
+    } else {
+
+        if (signedIn.user.role === 'service_role' || signedIn.user.role === 'supabase_admin' || signedIn.user.role === 'admin' || signedIn.user.app_metadata.role === 'team_leader' || signedIn.user.app_metadata.role === 'parking_attendant') {
+            next();
+            return;
+        }
+
+        next({ name: 'dashboard' });
+
+    }
+};
+
+const adminOnly = async (to, from, next) => {
+    const signedIn = await isSignedIn(false);
+    if (!signedIn) {
+        next({ name: 'login' });
+    } else {
+
+        if (signedIn.user.role === 'service_role' || signedIn.user.role === 'supabase_admin' || signedIn.user.role === 'admin') {
+            next();
+            return;
+        }
+
+        next({ name: 'dashboard' });
+    }
+};
+
+const adminAndTeamLeaderOnly = async (to, from, next) => {
+    const signedIn = await isSignedIn(false);
+    if (!signedIn) {
+        next({ name: 'login' });
+    } else {
+
+        if (signedIn.user.role === 'service_role' || signedIn.user.role === 'supabase_admin' || signedIn.user.role === 'admin' || signedIn.user.app_metadata.role === 'team_leader') {
+            next();
+            return;
+        }
+
+        next({ name: 'dashboard' });
+    }
+};
+
 const router = createRouter({
     history: createWebHistory(),
     routes: [
@@ -13,92 +68,43 @@ const router = createRouter({
                     path: '/',
                     name: 'dashboard',
                     component: () => import('@/views/Dashboard.vue'),
-                    beforeEnter: async (to, from, next) => {
-                        const signedIn = await isSignedIn();
-                        if (!signedIn) {
-                            next({ name: 'login' });
-                        } else {
-                            next();
-                        }
-                    }
+                    beforeEnter: anyoneCanAccess
                 },
                 {
                     path: 'profile',
                     name: 'Profile',
                     component: () => import('@/views/user/profile.vue'),
-                    beforeEnter: async (to, from, next) => {
-                        const signedIn = await isSignedIn();
-                        if (!signedIn) {
-                            next({ name: 'login' });
-                        } else {
-                            next();
-                        }
-                    }
+                    beforeEnter: anyoneCanAccess
                 },
                 {
                     path: 'events',
                     name: 'Events',
                     component: () => import('@/views/pages/events/Events.vue'),
-                    beforeEnter: async (to, from, next) => {
-                        const signedIn = await isSignedIn();
-                        if (!signedIn) {
-                            next({ name: 'login' });
-                        } else {
-                            next();
-                        }
-                    }
+                    beforeEnter: anyoneCanAccess
                 },
                 {
                     path: 'announcement',
                     name: 'Announcement',
                     component: () => import('@/views/pages/Announcement/Announcement.vue'),
-                    beforeEnter: async (to, from, next) => {
-                        const signedIn = await isSignedIn();
-                        if (!signedIn) {
-                            next({ name: 'login' });
-                        } else {
-                            next();
-                        }
-                    }
+                    beforeEnter: anyoneCanAccess
                 },
                 {
                     path: 'parking-slot',
                     name: 'Parking Slot',
                     component: () => import('@/views/pages/ParkingSlot/ParkingSlot.vue'),
-                    beforeEnter: async (to, from, next) => {
-                        const signedIn = await isSignedIn(false);
-                        if (!signedIn) {
-                            next({ name: 'login' });
-                        } else {
-
-                            if (signedIn.user.role === 'service_role' || signedIn.user.role === 'supabase_admin' || signedIn.user.role === 'admin' || signedIn.user.app_metadata.role === 'team_leader') {
-                                next();
-                                return;
-                            }
-
-                            next({ name: 'dashboard' });
-
-                        }
-                    }
+                    beforeEnter: adminParkingAttendantTeamLeaderRoutes
+                },
+                {
+                    path: 'available-parking',
+                    name: 'Available Parking',
+                    component: () => import('@/views/pages/ParkingSlot/AvailableParking.vue'),
+                    beforeEnter: anyoneCanAccess
                 },
                 {
                     path: 'manage-events-and-announcements',
                     name: 'Manage Events And Announcements',
                     component: () => import('@/views/pages/ManageEventsAndAnnouncements/ManageEventsAndAnnouncements.vue'),
-                    beforeEnter: async (to, from, next) => {
-                        const signedIn = await isSignedIn(false);
-                        if (!signedIn) {
-                            next({ name: 'login' });
-                        } else {
-
-                            if (signedIn.user.role === 'service_role' || signedIn.user.role === 'supabase_admin' || signedIn.user.role === 'admin') {
-                                next();
-                                return;
-                            }
-
-                            next({ name: 'dashboard' });
-                        }
-                    }
+                    beforeEnter: adminOnly
                 },
                 {
                     path: 'maintenance',
@@ -108,39 +114,13 @@ const router = createRouter({
                             path: 'street',
                             name: 'Street',
                             component: () => import('@/views/pages/Maintenance/Street.vue'),
-                            beforeEnter: async (to, from, next) => {
-                                const signedIn = await isSignedIn(false);
-                                if (!signedIn) {
-                                    next({ name: 'login' });
-                                } else {
-
-                                    if (signedIn.user.role === 'service_role' || signedIn.user.role === 'supabase_admin' || signedIn.user.role === 'admin') {
-                                        next();
-                                        return;
-                                    }
-
-                                    next({ name: 'dashboard' });
-                                }
-                            }
+                            beforeEnter: adminOnly
                         },
                         {
                             path: 'rates',
                             name: 'Rates',
                             component: () => import('@/views/pages/Maintenance/Rates.vue'),
-                            beforeEnter: async (to, from, next) => {
-                                const signedIn = await isSignedIn(false);
-                                if (!signedIn) {
-                                    next({ name: 'login' });
-                                } else {
-
-                                    if (signedIn.user.role === 'service_role' || signedIn.user.role === 'supabase_admin' || signedIn.user.role === 'admin') {
-                                        next();
-                                        return;
-                                    }
-
-                                    next({ name: 'dashboard' });
-                                }
-                            }
+                            beforeEnter: adminOnly
                         }
                     ]
                 },
@@ -152,79 +132,27 @@ const router = createRouter({
                             path: 'admin',
                             name: 'Admin',
                             component: () => import('@/views/pages/Users/Admin.vue'),
-                            beforeEnter: async (to, from, next) => {
-                                const signedIn = await isSignedIn(false);
-                                if (!signedIn) {
-                                    next({ name: 'login' });
-                                } else {
-
-                                    if (signedIn.user.role === 'service_role' || signedIn.user.role === 'supabase_admin' || signedIn.user.role === 'admin') {
-                                        next();
-                                        return;
-                                    }
-
-                                    next({ name: 'dashboard' });
-                                }
-                            }
+                            beforeEnter: adminOnly
                         },
                         {
                             path: 'team-leader',
                             name: 'Team Leader',
                             component: () => import('@/views/pages/Users/ManageTeamLeader.vue'),
-                            beforeEnter: async (to, from, next) => {
-                                const signedIn = await isSignedIn(false);
-                                if (!signedIn) {
-                                    next({ name: 'login' });
-                                } else {
-
-                                    if (signedIn.user.role === 'service_role' || signedIn.user.role === 'supabase_admin' || signedIn.user.role === 'admin') {
-                                        next();
-                                        return;
-                                    }
-
-                                    next({ name: 'dashboard' });
-                                }
-                            }
+                            beforeEnter: adminOnly
                         },
                         {
                             path: 'registered-users',
                             name: 'Registered Users',
                             component: () => import('@/views/pages/Users/RegisteredUser.vue'),
-                            beforeEnter: async (to, from, next) => {
-                                const signedIn = await isSignedIn(false);
-                                if (!signedIn) {
-                                    next({ name: 'login' });
-                                } else {
-
-                                    if (signedIn.user.role === 'service_role' || signedIn.user.role === 'supabase_admin' || signedIn.user.role === 'admin' || signedIn.user.app_metadata.role === 'team_leader') {
-                                        next();
-                                        return;
-                                    }
-
-                                    next({ name: 'dashboard' });
-                                }
-                            }
+                            beforeEnter: adminAndTeamLeaderOnly
                         },
                         {
                             path: 'registered-attendant',
                             name: 'Registered Attendant',
                             component: () => import('@/views/pages/Users/RegisteredAttendant.vue'),
-                            beforeEnter: async (to, from, next) => {
-                                const signedIn = await isSignedIn(false);
-                                if (!signedIn) {
-                                    next({ name: 'login' });
-                                } else {
-
-                                    if (signedIn.user.role === 'service_role' || signedIn.user.role === 'supabase_admin' || signedIn.user.role === 'admin' || signedIn.user.app_metadata.role === 'team_leader') {
-                                        next();
-                                        return;
-                                    }
-
-                                    next({ name: 'dashboard' });
-                                }
-                            }
+                            beforeEnter: adminAndTeamLeaderOnly
                         }
-                    ],
+                    ]
 
                 },
                 {
@@ -252,20 +180,7 @@ const router = createRouter({
                             component: () => import('@/views/pages/Report/IncidentReport.vue')
                         }
                     ],
-                    beforeEnter: async (to, from, next) => {
-                        const signedIn = await isSignedIn(false);
-                        if (!signedIn) {
-                            next({ name: 'login' });
-                        } else {
-
-                            if (signedIn.user.role === 'service_role' || signedIn.user.role === 'supabase_admin' || signedIn.user.role === 'admin' || signedIn.user.app_metadata.role === 'team_leader') {
-                                next();
-                                return;
-                            }
-
-                            next({ name: 'dashboard' });
-                        }
-                    }
+                    beforeEnter: adminAndTeamLeaderOnly
 
                 }
             ]

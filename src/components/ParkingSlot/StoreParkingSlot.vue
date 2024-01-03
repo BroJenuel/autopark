@@ -128,7 +128,7 @@ defineExpose({
                     :options="statusOptions"
                     class="w-full md:w-14rem"
                     optionLabel="name"
-                    optionValue="name"
+                    optionValue="code"
                     placeholder="Select Status"
                     required
                 />
