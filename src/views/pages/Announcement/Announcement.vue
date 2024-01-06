@@ -36,8 +36,8 @@ onMounted(() => {
         <div class="flex justify-content-between align-items-center">
             <h3><span class="pi pi-fw pi-bell" style="font-size: 1.5rem"></span> ANNOUNCEMENTS</h3>
         </div>
-        <div class="flex gap-3">
-            <Card v-for="event in events" :key="event.id" style="width: 25em; overflow: hidden">
+        <div class="flex gap-3 flex-column md:flex-row flex-wrap">
+            <Card v-for="event in events" :key="event.id" style="width: 100%; max-width: 25em; overflow: hidden">
                 <template #header>
                     <div class="flex justify-content-center" style="overflow: hidden;">
                         <Image
