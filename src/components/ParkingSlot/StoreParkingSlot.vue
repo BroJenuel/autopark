@@ -119,7 +119,7 @@ defineExpose({
                     class="w-full md:w-14rem"
                     optionLabel="name"
                     optionValue="code"
-                    placeholder="Select a City"
+                    placeholder="Select street"
                     required
                 />
             </div>

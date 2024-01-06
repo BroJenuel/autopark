@@ -6,8 +6,8 @@ const latSelected = ref(0.00);
 const lngSelected = ref(0.00);
 
 function toggleModal(lat, lng) {
-    latSelected.value = lat ?? 16.405950364340057;
-    lngSelected.value = lng ?? 120.59147320190415;
+    latSelected.value = lat ?? 16.412115179298162;
+    lngSelected.value = lng ?? 120.59332392612443;
     showModal.value = !showModal.value;
     setTimeout(() => {
         setMap();
