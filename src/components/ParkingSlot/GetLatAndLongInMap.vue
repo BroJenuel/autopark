@@ -2,23 +2,25 @@
 import { ref } from 'vue';
 
 const showModal = ref(false);
-const latSelected = ref(0);
-const lngSelected = ref(0);
+const latSelected = ref(0.00);
+const lngSelected = ref(0.00);
 
 function toggleModal(lat, lng) {
     latSelected.value = lat ?? 16.405950364340057;
     lngSelected.value = lng ?? 120.59147320190415;
     showModal.value = !showModal.value;
     setTimeout(() => {
-        initMap();
+        setMap();
     }, 1000);
 }
 
-function initMap() {
+function setMap() {
+    const defaultCenter = { lat: Number(latSelected.value), lng: Number(lngSelected.value) };
+
     const map = new google.maps.Map(document.getElementById('map_canvas'), {
         zoom: 17, // Initial zoom level
-        center: { lat: latSelected.value, lng: lngSelected.value }, // Center coordinates (San Francisco)
-        mapTypeControl: true,
+        center: defaultCenter,
+        mapTypeControl: true
     });
 
     // Disable default UI elements
@@ -32,8 +34,8 @@ function initMap() {
     });
 
     const marker = new google.maps.Marker({
-        position: { lat: latSelected.value, lng: lngSelected.value}, // Marker position
-        map: map, // Attach the marker to the map
+        position: defaultCenter, // Marker position
+        map: map // Attach the marker to the map
     });
 
     map.addListener('click', function(e) {

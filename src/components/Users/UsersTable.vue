@@ -42,8 +42,6 @@ const loadLazyData = async (event) => {
         full_name: `${user.data.first_name ?? ''} ${user.data.middle_name ?? ''} ${user.data.last_name ?? ''}`,
         client_role: getClientRole(user.role)
     }));
-
-    console.log(usersData.value)
 };
 
 function getClientRole(supabase_user_role) {
