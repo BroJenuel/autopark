@@ -41,7 +41,7 @@ function showDataModal(data) {
 </script>
 
 <template>
-    <Dialog v-model:visible="showAnnouncementDialog" modal>
+    <Dialog v-model:visible="showAnnouncementDialog" modal dismissableMask>
         <Card v-if="dataShow" style="width: 100%; max-width: 25em; overflow: hidden">
             <template #header>
                 <div class="flex justify-content-center" style="overflow: hidden;">

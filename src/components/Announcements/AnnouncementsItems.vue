@@ -40,7 +40,7 @@ function showDataModal(data) {
 </script>
 
 <template>
-    <Dialog v-model:visible="showAnnouncementDialog" modal>
+    <Dialog v-model:visible="showAnnouncementDialog" :style="{ width: '50rem', margin: '0 10px' }" :breakpoints="{ '1199px': '75vw', '575px': '90vw' }" modal dismissableMask>
         <Card v-if="dataShow" style="width: 100%; max-width: 25em; overflow: hidden">
             <template #header>
                 <div class="flex justify-content-center" style="overflow: hidden;">
