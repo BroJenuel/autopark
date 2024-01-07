@@ -2,10 +2,12 @@
 import { onMounted, reactive, ref, watch } from 'vue';
 import ProductService from '@/service/ProductService';
 import { useLayout } from '@/layout/composables/layout';
-import CountCards from '@/components/Dashboard/CountCards.vue';
+import AdminCountCards from '@/components/Dashboard/AdminCountCards.vue';
 import AnnouncementsItems from '@/components/Announcements/AnnouncementsItems.vue';
 import EventItems from '@/components/Events/EventItems.vue';
+import { useUserStore } from '@/store/userStore';
 
+const userStore = useUserStore();
 const { isDarkTheme } = useLayout();
 
 const products = ref(null);
@@ -118,8 +120,8 @@ watch(
 </script>
 
 <template>
+    <AdminCountCards v-if="userStore.role === 'admin'" />
     <div class="grid">
-        <CountCards />
         <div class="col-12 xl:col-12">
             <h3>Announcements</h3>
             <AnnouncementsItems />
