@@ -182,6 +182,12 @@ const router = createRouter({
                     ],
                     beforeEnter: adminAndTeamLeaderOnly
 
+                },
+                {
+                    path: 'my-bookings',
+                    name: 'My Bookings',
+                    component: () => import('@/views/pages/Booking/BookingList.vue'),
+                    beforeEnter: anyoneCanAccess
                 }
             ]
         },

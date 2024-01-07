@@ -43,6 +43,8 @@ async function bookSlot() {
     showModal.value = false;
     showConfirmModal.value = false;
     emit('booked', slotDetails.value);
+
+    // redirect to my booking
 }
 
 const emit = defineEmits(['booked'])
@@ -67,7 +69,7 @@ defineExpose({
         </div>
     </Dialog>
     <Dialog v-model:visible="showConfirmModal" modal :style="{ width: '40rem', margin: '0 10px' }">
-        <h4>Are you sure to book {{ slotDetails.area ?? '' }}, {{ slotDetails.street ?? '' }}?</h4>
+        <h4>Are you sure to book {{ slotDetails.area ?? '' }}, {{ slotDetails.street ?? '' }}? You will be charged a fee.</h4>
         <div>lat: {{  slotDetails.latitude ?? '' }}</div>
         <div>lng: {{  slotDetails.longitude ?? ''}}</div>
         <div class="flex flex-column gap-3 mt-5">

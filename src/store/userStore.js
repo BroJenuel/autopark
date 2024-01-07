@@ -7,6 +7,9 @@ export const useUserStore = defineStore('user',() => {
         session,
         role: computed(() => {
             return session.value?.user?.app_metadata?.role ?? 'driver';
+        }),
+        id: computed(() => {
+            return session.value?.user?.id ?? null;
         })
     }
 })

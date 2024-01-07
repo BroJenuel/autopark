@@ -107,6 +107,7 @@ const driverMenu = [
             { label: 'Events', icon: 'pi pi-fw pi-calendar', to: '/events' },
             { label: 'Announcements', icon: 'pi pi-fw pi-bell', to: '/announcement' },
             { label: 'Available Parking Map', icon: 'pi pi-map', to: '/available-parking' },
+            { label: 'My Booking', icon: 'pi pi-fw pi-file', to: '/my-bookings' },
         ]
     },
 ];
