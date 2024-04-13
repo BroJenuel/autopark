@@ -121,9 +121,9 @@ function updateParkingSlotStatus() {
             tableStyle="min-width: 50rem"
         >
             <template #header>
-                <div class="flex justify-content-between">
+                <div class="flex gap-2 justify-content-between flex-wrap">
                     <div>
-                        <Button :disabled="selectedSlots.length === 0"
+                        <Button size="small" :disabled="selectedSlots.length === 0"
                                 @click="showUpdateStatusOfSelectedParkingSlot = true">Change Status
                         </Button>
                     </div>
