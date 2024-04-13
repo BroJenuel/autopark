@@ -1,26 +1,24 @@
 <script setup>
-import { onMounted, ref } from 'vue';
-import StoreStreetModal from '@/components/Street/StoreStreet.vue';
-import { useToast } from 'primevue/usetoast';
-import { FilterMatchMode } from 'primevue/api';
-import { supabaseClient } from '@/service/supabase/supabase';
+import { onMounted, ref } from "vue";
+import StoreStreetModal from "@/components/Street/StoreStreet.vue";
+import { useToast } from "primevue/usetoast";
+import { FilterMatchMode } from "primevue/api";
+import { supabaseClient } from "@/service/supabase/supabase";
 
 const loading = ref(false);
 const toast = useToast();
 const StoreStreetModalRef = ref();
 const streetsData = ref([]);
 const filters = ref({
-    global: { value: null, matchMode: FilterMatchMode.CONTAINS }
+    global: { value: null, matchMode: FilterMatchMode.CONTAINS },
 });
 
 async function getEventsAndAnnouncements() {
     loading.value = true;
-    const { data, error } = await supabaseClient
-        .from('streets')
-        .select();
+    const { data, error } = await supabaseClient.from("streets").select();
 
     if (error) {
-        toast.add({ severity: 'error', summary: 'Error', detail: error.message });
+        toast.add({ severity: "error", summary: "Error", detail: error.message });
         return;
     }
 
@@ -29,9 +27,9 @@ async function getEventsAndAnnouncements() {
 }
 
 function badgeTypeStatus(status) {
-    if (status === 'active') return 'success';
-    if (status === 'inactive') return 'danger';
-    return 'info';
+    if (status === "active") return "success";
+    if (status === "inactive") return "danger";
+    return "info";
 }
 
 onMounted(async () => {
@@ -39,19 +37,20 @@ onMounted(async () => {
 });
 
 const products = ref();
-
 </script>
 <template>
-    <StoreStreetModal ref="StoreStreetModalRef"
-                      @stored="getEventsAndAnnouncements" />
+    <StoreStreetModal ref="StoreStreetModalRef" @stored="getEventsAndAnnouncements" />
     <div class="card">
         <div class="flex justify-content-between align-items-center">
             <h3><span class="pi pi-fw pi-map" style="font-size: 1.5rem"></span> Streets</h3>
             <div class="flex align-items-center">
-                <Button class="mr-2" icon="pi pi-plus" label="Create"
-                        @click="StoreStreetModalRef.toggleModal()" />
-                <Button icon="pi pi-refresh" severity="secondary" title="Refresh"
-                        @click="getEventsAndAnnouncements()" />
+                <Button class="mr-2" icon="pi pi-plus" label="Create" @click="StoreStreetModalRef.toggleModal()" />
+                <Button
+                    icon="pi pi-refresh"
+                    severity="secondary"
+                    title="Refresh"
+                    @click="getEventsAndAnnouncements()"
+                />
             </div>
         </div>
         <DataTable
@@ -65,10 +64,12 @@ const products = ref();
         >
             <template #header>
                 <div class="flex justify-content-end">
-                    <span class="p-input-icon-left">
-                        <i class="pi pi-search" />
+                    <IconField iconPosition="left">
+                        <InputIcon>
+                            <i class="pi pi-search" />
+                        </InputIcon>
                         <InputText v-model="filters['global'].value" placeholder="Keyword Search" />
-                    </span>
+                    </IconField>
                 </div>
             </template>
             <Column field="created_at" header="Date Created" sortable>

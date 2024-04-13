@@ -1,152 +1,146 @@
 <script setup>
-import { computed, onMounted, ref } from 'vue';
-import AppMenuItem from './AppMenuItem.vue';
-import { useUserStore } from '@/store/userStore';
+import { onMounted, ref } from "vue";
+import AppMenuItem from "./AppMenuItem.vue";
+import { useUserStore } from "@/store/userStore";
 
 const user = useUserStore();
 
 const adminModal = [
     {
-        label: 'Main',
+        label: "Main",
         items: [
-            { label: 'Dashboard', icon: 'pi pi-fw pi-home', to: '/' },
-            { label: 'Events', icon: 'pi pi-fw pi-calendar', to: '/events' },
-            { label: 'Announcements', icon: 'pi pi-fw pi-bell', to: '/announcement' },
+            { label: "Dashboard", icon: "pi pi-fw pi-home", to: "/" },
+            { label: "Events", icon: "pi pi-fw pi-calendar", to: "/events" },
+            { label: "Announcements", icon: "pi pi-fw pi-bell", to: "/announcement" },
             {
-                label: 'Parking',
-                icon: 'pi pi-fw pi-car',
-                items: [
-                    { label: 'Manage Slots', icon: 'pi pi-fw pi-map', to: '/parking-slot' }
-                ]
+                label: "Parking",
+                icon: "pi pi-fw pi-car",
+                items: [{ label: "Manage Slots", icon: "pi pi-fw pi-map", to: "/parking-slot" }],
             },
             {
-                label: 'Manage Events/Announc.',
-                icon: 'pi pi-fw pi-calendar',
-                to: '/manage-events-and-announcements'
-            }
-        ]
+                label: "Manage Events/Announc.",
+                icon: "pi pi-fw pi-calendar",
+                to: "/manage-events-and-announcements",
+            },
+        ],
     },
     {
-        label: 'Maintenance',
+        label: "Maintenance",
         items: [
-            { label: 'Street', icon: 'pi pi-fw pi-map', to: '/maintenance/street' },
-            { label: 'Rates', icon: 'pi pi-fw pi-dollar', to: '/maintenance/rates' }
-        ]
+            { label: "Street", icon: "pi pi-fw pi-map", to: "/maintenance/street" },
+            { label: "Rates", icon: "pi pi-fw pi-dollar", to: "/maintenance/rates" },
+        ],
     },
     {
-        label: 'Users',
+        label: "Users",
         items: [
-            { label: 'Admin', icon: 'pi pi-fw pi-user', to: '/manage-users/admin' },
-            { label: 'Team Leader', icon: 'pi pi-fw pi-user', to: '/manage-users/team-leader' },
-            { label: 'Registered User', icon: 'pi pi-fw pi-user', to: '/manage-users/registered-users' },
-            { label: 'Registered Attendant', icon: 'pi pi-fw pi-user', to: '/manage-users/registered-attendant' }
-        ]
+            { label: "Admin", icon: "pi pi-fw pi-user", to: "/manage-users/admin" },
+            { label: "Team Leader", icon: "pi pi-fw pi-user", to: "/manage-users/team-leader" },
+            { label: "Registered User", icon: "pi pi-fw pi-user", to: "/manage-users/registered-users" },
+            { label: "Registered Attendant", icon: "pi pi-fw pi-user", to: "/manage-users/registered-attendant" },
+        ],
     },
     {
-        label: 'Reports',
+        label: "Reports",
         items: [
             {
-                label: 'Reports',
-                icon: 'pi pi-fw pi-file',
+                label: "Reports",
+                icon: "pi pi-fw pi-file",
                 items: [
-                    { label: 'Completed Booking', icon: 'pi pi-fw pi-file', to: '/reports/completed-booking' },
-                    { label: 'Online Payment', icon: 'pi pi-fw pi-file', to: '/reports/online-payment' },
-                    { label: 'Manual Payment', icon: 'pi pi-fw pi-file', to: '/reports/manual-payment' },
-                    { label: 'Incident Report', icon: 'pi pi-fw pi-file', to: '/reports/incident-report' }
-                ]
-            }
-        ]
-    }
+                    { label: "Completed Booking", icon: "pi pi-fw pi-file", to: "/reports/completed-booking" },
+                    { label: "Online Payment", icon: "pi pi-fw pi-file", to: "/reports/online-payment" },
+                    { label: "Manual Payment", icon: "pi pi-fw pi-file", to: "/reports/manual-payment" },
+                    { label: "Incident Report", icon: "pi pi-fw pi-file", to: "/reports/incident-report" },
+                ],
+            },
+        ],
+    },
 ];
 
 const teamLeader = [
     {
-        label: 'Main',
+        label: "Main",
         items: [
-            { label: 'Dashboard', icon: 'pi pi-fw pi-home', to: '/' },
-            { label: 'Events', icon: 'pi pi-fw pi-calendar', to: '/events' },
-            { label: 'Announcements', icon: 'pi pi-fw pi-bell', to: '/announcement' },
-            { label: 'Incident Report', icon: 'pi pi-fw pi-file', to: '/reports/incident-report' },
+            { label: "Dashboard", icon: "pi pi-fw pi-home", to: "/" },
+            { label: "Events", icon: "pi pi-fw pi-calendar", to: "/events" },
+            { label: "Announcements", icon: "pi pi-fw pi-bell", to: "/announcement" },
+            { label: "Incident Report", icon: "pi pi-fw pi-file", to: "/reports/incident-report" },
             {
-                label: 'Parking',
-                icon: 'pi pi-fw pi-car',
-                items: [
-                    { label: 'Manage Slots', icon: 'pi pi-fw pi-map', to: '/parking-slot' }
-                ]
+                label: "Parking",
+                icon: "pi pi-fw pi-car",
+                items: [{ label: "Manage Slots", icon: "pi pi-fw pi-map", to: "/parking-slot" }],
             },
-        ]
+        ],
     },
     {
-        label: 'Users',
+        label: "Users",
         items: [
-            { label: 'Registered User', icon: 'pi pi-fw pi-user', to: '/manage-users/registered-users' },
-            { label: 'Registered Attendant', icon: 'pi pi-fw pi-user', to: '/manage-users/registered-attendant' }
-        ]
+            { label: "Registered User", icon: "pi pi-fw pi-user", to: "/manage-users/registered-users" },
+            { label: "Registered Attendant", icon: "pi pi-fw pi-user", to: "/manage-users/registered-attendant" },
+        ],
     },
     {
-        label: 'Reports',
+        label: "Reports",
         items: [
             {
-                label: 'Reports',
-                icon: 'pi pi-fw pi-file',
+                label: "Reports",
+                icon: "pi pi-fw pi-file",
                 items: [
-                    { label: 'Completed Booking', icon: 'pi pi-fw pi-file', to: '/reports/completed-booking' },
-                    { label: 'Online Payment', icon: 'pi pi-fw pi-file', to: '/reports/online-payment' },
-                    { label: 'Manual Payment', icon: 'pi pi-fw pi-file', to: '/reports/manual-payment' },
-                ]
-            }
-        ]
-    }
+                    { label: "Completed Booking", icon: "pi pi-fw pi-file", to: "/reports/completed-booking" },
+                    { label: "Online Payment", icon: "pi pi-fw pi-file", to: "/reports/online-payment" },
+                    { label: "Manual Payment", icon: "pi pi-fw pi-file", to: "/reports/manual-payment" },
+                ],
+            },
+        ],
+    },
 ];
 
 const driverMenu = [
     {
-        label: 'Main',
+        label: "Main",
         items: [
-            { label: 'Dashboard', icon: 'pi pi-fw pi-home', to: '/' },
-            { label: 'Events', icon: 'pi pi-fw pi-calendar', to: '/events' },
-            { label: 'Announcements', icon: 'pi pi-fw pi-bell', to: '/announcement' },
-            { label: 'Available Parking Map', icon: 'pi pi-map', to: '/available-parking' },
-            { label: 'My Booking', icon: 'pi pi-fw pi-file', to: '/my-bookings' },
-        ]
+            { label: "Dashboard", icon: "pi pi-fw pi-home", to: "/" },
+            { label: "Events", icon: "pi pi-fw pi-calendar", to: "/events" },
+            { label: "Announcements", icon: "pi pi-fw pi-bell", to: "/announcement" },
+            { label: "Available Parking Map", icon: "pi pi-map", to: "/available-parking" },
+            { label: "My Booking", icon: "pi pi-fw pi-file", to: "/my-bookings" },
+        ],
     },
 ];
 
 const parkingAttendantMenu = [
     {
-        label: 'Main',
+        label: "Main",
         items: [
-            { label: 'Dashboard', icon: 'pi pi-fw pi-home', to: '/' },
-            { label: 'Events', icon: 'pi pi-fw pi-calendar', to: '/events' },
-            { label: 'Announcements', icon: 'pi pi-fw pi-bell', to: '/announcement' },
+            { label: "Dashboard", icon: "pi pi-fw pi-home", to: "/" },
+            { label: "Events", icon: "pi pi-fw pi-calendar", to: "/events" },
+            { label: "Announcements", icon: "pi pi-fw pi-bell", to: "/announcement" },
             {
-                label: 'Parking',
-                icon: 'pi pi-fw pi-car',
-                items: [
-                    { label: 'Manage Slots', icon: 'pi pi-fw pi-map', to: '/parking-slot' }
-                ]
+                label: "Parking",
+                icon: "pi pi-fw pi-car",
+                items: [{ label: "Manage Slots", icon: "pi pi-fw pi-map", to: "/parking-slot" }],
             },
-        ]
+        ],
     },
-]
+];
 
 const model = ref([]);
 
 onMounted(() => {
     const userSession = user.session;
     const role = userSession.user.app_metadata.role;
-    if (role === 'admin' || role === 'service_role' || role === 'supabase_admin') {
+    if (role === "admin" || role === "service_role" || role === "supabase_admin") {
         model.value = adminModal;
-    } else if (role === 'driver' || role === 'authenticated') {
+    } else if (role === "driver" || role === "authenticated") {
         model.value = driverMenu;
-    } else if (role === 'parking_attendant') {
+    } else if (role === "parking_attendant") {
         model.value = parkingAttendantMenu;
-    } else if (role === 'team_leader') {
+    } else if (role === "team_leader") {
         model.value = teamLeader;
     } else {
         model.value = driverMenu;
     }
-})
+});
 </script>
 
 <template>

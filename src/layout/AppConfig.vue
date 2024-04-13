@@ -1,19 +1,19 @@
 <script setup>
-import RadioButton from 'primevue/radiobutton';
-import Button from 'primevue/button';
-import InputSwitch from 'primevue/inputswitch';
-import Sidebar from 'primevue/sidebar';
-import SnapStorage from 'snap-storage'
+import RadioButton from "primevue/radiobutton";
+import Button from "primevue/button";
+import InputSwitch from "primevue/inputswitch";
+import Sidebar from "primevue/sidebar";
+import SnapStorage from "snap-storage";
 
-import { onMounted, ref } from 'vue';
-import { useLayout } from '@/layout/composables/layout';
-import { changeTheme, checkTheme } from '@/service/layout';
+import { onMounted, ref } from "vue";
+import { useLayout } from "@/layout/composables/layout";
+import { changeTheme, checkTheme } from "@/service/layout";
 
 defineProps({
     simple: {
         type: Boolean,
-        default: false
-    }
+        default: false,
+    },
 });
 const scales = ref([12, 13, 14, 15, 16]);
 const visible = ref(false);
@@ -33,45 +33,78 @@ const incrementScale = () => {
     applyScale();
 };
 const applyScale = () => {
-    document.documentElement.style.fontSize = layoutConfig.scale.value + 'px';
+    document.documentElement.style.fontSize = layoutConfig.scale.value + "px";
 };
 
 onMounted(() => {
     checkTheme();
-})
+});
 
 defineExpose({
     toggleThemeConfig: () => {
         visible.value = !visible.value;
-    }
-})
+    },
+});
 </script>
 
 <template>
-<!--    <button class="layout-config-button p-link" type="button" @click="onConfigButtonClick()">-->
-<!--        <i class="pi pi-cog"></i>-->
-<!--    </button>-->
+    <!--    <button class="layout-config-button p-link" type="button" @click="onConfigButtonClick()">-->
+    <!--        <i class="pi pi-cog"></i>-->
+    <!--    </button>-->
 
-    <Sidebar v-model:visible="visible" position="right" :transitionOptions="'.3s cubic-bezier(0, 0, 0.2, 1)'" class="layout-config-sidebar w-20rem">
+    <Sidebar
+        v-model:visible="visible"
+        position="right"
+        :transitionOptions="'.3s cubic-bezier(0, 0, 0.2, 1)'"
+        class="layout-config-sidebar w-20rem"
+    >
         <h5>Scale</h5>
         <div class="flex align-items-center">
-            <Button icon="pi pi-minus" type="button" @click="decrementScale()" class="p-button-text p-button-rounded w-2rem h-2rem mr-2" :disabled="layoutConfig.scale.value === scales[0]"></Button>
+            <Button
+                icon="pi pi-minus"
+                type="button"
+                @click="decrementScale()"
+                class="p-button-text p-button-rounded w-2rem h-2rem mr-2"
+                :disabled="layoutConfig.scale.value === scales[0]"
+            ></Button>
             <div class="flex gap-2 align-items-center">
-                <i class="pi pi-circle-fill text-300" v-for="s in scales" :key="s" :class="{ 'text-primary-500': s === layoutConfig.scale.value }"></i>
+                <i
+                    class="pi pi-circle-fill text-300"
+                    v-for="s in scales"
+                    :key="s"
+                    :class="{ 'text-primary-500': s === layoutConfig.scale.value }"
+                ></i>
             </div>
-            <Button icon="pi pi-plus" type="button" pButton @click="incrementScale()" class="p-button-text p-button-rounded w-2rem h-2rem ml-2" :disabled="layoutConfig.scale.value === scales[scales.length - 1]"></Button>
+            <Button
+                icon="pi pi-plus"
+                type="button"
+                pButton
+                @click="incrementScale()"
+                class="p-button-text p-button-rounded w-2rem h-2rem ml-2"
+                :disabled="layoutConfig.scale.value === scales[scales.length - 1]"
+            ></Button>
         </div>
 
         <template v-if="!simple">
             <h5>Menu Type</h5>
             <div class="flex">
                 <div class="field-radiobutton flex-1">
-                    <RadioButton name="menuMode" value="static" v-model="layoutConfig.menuMode.value" inputId="mode1"></RadioButton>
+                    <RadioButton
+                        name="menuMode"
+                        value="static"
+                        v-model="layoutConfig.menuMode.value"
+                        inputId="mode1"
+                    ></RadioButton>
                     <label for="mode1">Static</label>
                 </div>
 
                 <div class="field-radiobutton flex-1">
-                    <RadioButton name="menuMode" value="overlay" v-model="layoutConfig.menuMode.value" inputId="mode2"></RadioButton>
+                    <RadioButton
+                        name="menuMode"
+                        value="overlay"
+                        v-model="layoutConfig.menuMode.value"
+                        inputId="mode2"
+                    ></RadioButton>
                     <label for="mode2">Overlay</label>
                 </div>
             </div>
@@ -81,11 +114,21 @@ defineExpose({
             <h5>Input Style</h5>
             <div class="flex">
                 <div class="field-radiobutton flex-1">
-                    <RadioButton name="inputStyle" value="outlined" v-model="layoutConfig.inputStyle.value" inputId="outlined_input"></RadioButton>
+                    <RadioButton
+                        name="inputStyle"
+                        value="outlined"
+                        v-model="layoutConfig.inputStyle.value"
+                        inputId="outlined_input"
+                    ></RadioButton>
                     <label for="outlined_input">Outlined</label>
                 </div>
                 <div class="field-radiobutton flex-1">
-                    <RadioButton name="inputStyle" value="filled" v-model="layoutConfig.inputStyle.value" inputId="filled_input"></RadioButton>
+                    <RadioButton
+                        name="inputStyle"
+                        value="filled"
+                        v-model="layoutConfig.inputStyle.value"
+                        inputId="filled_input"
+                    ></RadioButton>
                     <label for="filled_input">Filled</label>
                 </div>
             </div>
@@ -98,22 +141,38 @@ defineExpose({
         <div class="grid">
             <div class="col-3">
                 <button class="p-link w-2rem h-2rem" @click="changeTheme('bootstrap4-light-blue', 'light')">
-                    <img src="/layout/images/themes/bootstrap4-light-blue.svg" class="w-2rem h-2rem" alt="Bootstrap Light Blue" />
+                    <img
+                        src="/layout/images/themes/bootstrap4-light-blue.svg"
+                        class="w-2rem h-2rem"
+                        alt="Bootstrap Light Blue"
+                    />
                 </button>
             </div>
             <div class="col-3">
                 <button class="p-link w-2rem h-2rem" @click="changeTheme('bootstrap4-light-purple', 'light')">
-                    <img src="/layout/images/themes/bootstrap4-light-purple.svg" class="w-2rem h-2rem" alt="Bootstrap Light Purple" />
+                    <img
+                        src="/layout/images/themes/bootstrap4-light-purple.svg"
+                        class="w-2rem h-2rem"
+                        alt="Bootstrap Light Purple"
+                    />
                 </button>
             </div>
             <div class="col-3">
                 <button class="p-link w-2rem h-2rem" @click="changeTheme('bootstrap4-dark-blue', 'dark')">
-                    <img src="/layout/images/themes/bootstrap4-dark-blue.svg" class="w-2rem h-2rem" alt="Bootstrap Dark Blue" />
+                    <img
+                        src="/layout/images/themes/bootstrap4-dark-blue.svg"
+                        class="w-2rem h-2rem"
+                        alt="Bootstrap Dark Blue"
+                    />
                 </button>
             </div>
             <div class="col-3">
                 <button class="p-link w-2rem h-2rem" @click="changeTheme('bootstrap4-dark-purple', 'dark')">
-                    <img src="/layout/images/themes/bootstrap4-dark-purple.svg" class="w-2rem h-2rem" alt="Bootstrap Dark Purple" />
+                    <img
+                        src="/layout/images/themes/bootstrap4-dark-purple.svg"
+                        class="w-2rem h-2rem"
+                        alt="Bootstrap Dark Purple"
+                    />
                 </button>
             </div>
         </div>
@@ -122,22 +181,38 @@ defineExpose({
         <div class="grid">
             <div class="col-3">
                 <button class="p-link w-2rem h-2rem" @click="changeTheme('md-light-indigo', 'light')">
-                    <img src="/layout/images/themes/md-light-indigo.svg" class="w-2rem h-2rem" alt="Material Light Indigo" />
+                    <img
+                        src="/layout/images/themes/md-light-indigo.svg"
+                        class="w-2rem h-2rem"
+                        alt="Material Light Indigo"
+                    />
                 </button>
             </div>
             <div class="col-3">
                 <button class="p-link w-2rem h-2rem" @click="changeTheme('md-light-deeppurple', 'light')">
-                    <img src="/layout/images/themes/md-light-deeppurple.svg" class="w-2rem h-2rem" alt="Material Light DeepPurple" />
+                    <img
+                        src="/layout/images/themes/md-light-deeppurple.svg"
+                        class="w-2rem h-2rem"
+                        alt="Material Light DeepPurple"
+                    />
                 </button>
             </div>
             <div class="col-3">
                 <button class="p-link w-2rem h-2rem" @click="changeTheme('md-dark-indigo', 'dark')">
-                    <img src="/layout/images/themes/md-dark-indigo.svg" class="w-2rem h-2rem" alt="Material Dark Indigo" />
+                    <img
+                        src="/layout/images/themes/md-dark-indigo.svg"
+                        class="w-2rem h-2rem"
+                        alt="Material Dark Indigo"
+                    />
                 </button>
             </div>
             <div class="col-3">
                 <button class="p-link w-2rem h-2rem" @click="changeTheme('md-dark-deeppurple', 'dark')">
-                    <img src="/layout/images/themes/md-dark-deeppurple.svg" class="w-2rem h-2rem" alt="Material Dark DeepPurple" />
+                    <img
+                        src="/layout/images/themes/md-dark-deeppurple.svg"
+                        class="w-2rem h-2rem"
+                        alt="Material Dark DeepPurple"
+                    />
                 </button>
             </div>
         </div>
@@ -146,22 +221,38 @@ defineExpose({
         <div class="grid">
             <div class="col-3">
                 <button class="p-link w-2rem h-2rem" @click="changeTheme('mdc-light-indigo', 'light')">
-                    <img src="/layout/images/themes/md-light-indigo.svg" class="w-2rem h-2rem" alt="Material Light Indigo" />
+                    <img
+                        src="/layout/images/themes/md-light-indigo.svg"
+                        class="w-2rem h-2rem"
+                        alt="Material Light Indigo"
+                    />
                 </button>
             </div>
             <div class="col-3">
                 <button class="p-link w-2rem h-2rem" @click="changeTheme('mdc-light-deeppurple', 'light')">
-                    <img src="/layout/images/themes/md-light-deeppurple.svg" class="w-2rem h-2rem" alt="Material Light Deep Purple" />
+                    <img
+                        src="/layout/images/themes/md-light-deeppurple.svg"
+                        class="w-2rem h-2rem"
+                        alt="Material Light Deep Purple"
+                    />
                 </button>
             </div>
             <div class="col-3">
                 <button class="p-link w-2rem h-2rem" @click="changeTheme('mdc-dark-indigo', 'dark')">
-                    <img src="/layout/images/themes/md-dark-indigo.svg" class="w-2rem h-2rem" alt="Material Dark Indigo" />
+                    <img
+                        src="/layout/images/themes/md-dark-indigo.svg"
+                        class="w-2rem h-2rem"
+                        alt="Material Dark Indigo"
+                    />
                 </button>
             </div>
             <div class="col-3">
                 <button class="p-link w-2rem h-2rem" @click="changeTheme('mdc-dark-deeppurple', 'dark')">
-                    <img src="/layout/images/themes/md-dark-deeppurple.svg" class="w-2rem h-2rem" alt="Material Dark Deep Purple" />
+                    <img
+                        src="/layout/images/themes/md-dark-deeppurple.svg"
+                        class="w-2rem h-2rem"
+                        alt="Material Dark Deep Purple"
+                    />
                 </button>
             </div>
         </div>
@@ -188,7 +279,11 @@ defineExpose({
         <div class="grid">
             <div class="col-3">
                 <button class="p-link w-2rem h-2rem" @click="changeTheme('lara-light-indigo', 'light')">
-                    <img src="/layout/images/themes/lara-light-indigo.png" class="w-2rem h-2rem" alt="Lara Light Indigo" />
+                    <img
+                        src="/layout/images/themes/lara-light-indigo.png"
+                        class="w-2rem h-2rem"
+                        alt="Lara Light Indigo"
+                    />
                 </button>
             </div>
             <div class="col-3">
@@ -198,7 +293,11 @@ defineExpose({
             </div>
             <div class="col-3">
                 <button class="p-link w-2rem h-2rem" @click="changeTheme('lara-light-purple', 'light')">
-                    <img src="/layout/images/themes/lara-light-purple.png" class="w-2rem h-2rem" alt="Lara Light Purple" />
+                    <img
+                        src="/layout/images/themes/lara-light-purple.png"
+                        class="w-2rem h-2rem"
+                        alt="Lara Light Purple"
+                    />
                 </button>
             </div>
             <div class="col-3">
@@ -208,7 +307,11 @@ defineExpose({
             </div>
             <div class="col-3">
                 <button class="p-link w-2rem h-2rem" @click="changeTheme('lara-dark-indigo', 'dark')">
-                    <img src="/layout/images/themes/lara-dark-indigo.png" class="w-2rem h-2rem" alt="Lara Dark Indigo" />
+                    <img
+                        src="/layout/images/themes/lara-dark-indigo.png"
+                        class="w-2rem h-2rem"
+                        alt="Lara Dark Indigo"
+                    />
                 </button>
             </div>
             <div class="col-3">
@@ -218,7 +321,11 @@ defineExpose({
             </div>
             <div class="col-3">
                 <button class="p-link w-2rem h-2rem" @click="changeTheme('lara-dark-purple', 'dark')">
-                    <img src="/layout/images/themes/lara-dark-purple.png" class="w-2rem h-2rem" alt="Lara Dark Purple" />
+                    <img
+                        src="/layout/images/themes/lara-dark-purple.png"
+                        class="w-2rem h-2rem"
+                        alt="Lara Dark Purple"
+                    />
                 </button>
             </div>
             <div class="col-3">

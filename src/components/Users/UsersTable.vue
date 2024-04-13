@@ -1,8 +1,8 @@
 <script setup>
-import { onMounted, ref } from 'vue';
-import { FilterMatchMode } from 'primevue/api';
-import { supabaseClient, supabaseSecretClient } from '@/service/supabase/supabase';
-import dayjs from 'dayjs';
+import { onMounted, ref } from "vue";
+import { FilterMatchMode } from "primevue/api";
+import { supabaseClient, supabaseSecretClient } from "@/service/supabase/supabase";
+import dayjs from "dayjs";
 
 onMounted(() => {
     loadLazyData();
@@ -11,60 +11,55 @@ onMounted(() => {
 const loading = ref(false);
 const usersData = ref([]);
 const filters = ref({
-    global: { value: null, matchMode: FilterMatchMode.CONTAINS }
+    global: { value: null, matchMode: FilterMatchMode.CONTAINS },
 });
 const columns = ref([
-    { field: 'name', header: 'Name' },
-    { field: 'country.name', header: 'Country' },
-    { field: 'company', header: 'Company' },
-    { field: 'representative.name', header: 'Representative' }
+    { field: "name", header: "Name" },
+    { field: "country.name", header: "Country" },
+    { field: "company", header: "Company" },
+    { field: "representative.name", header: "Representative" },
 ]);
 
 const loadLazyData = async (event) => {
     loading.value = true;
-    const getUserProfiles = supabaseClient
-        .from('user_profile')
-        .select()
-        .limit(1000);
+    const getUserProfiles = supabaseClient.from("user_profile").select().limit(1000);
 
-    const { data, error } = await getUserProfiles.eq('role', props.role);
+    const { data, error } = await getUserProfiles.eq("role", props.role);
 
     loading.value = false;
 
     if (error) {
-        toast.add({ severity: 'error', summary: 'Error', detail: error.message, life: 3000 });
+        toast.add({ severity: "error", summary: "Error", detail: error.message, life: 3000 });
         return;
     }
 
-    usersData.value = data.map(user => ({
+    usersData.value = data.map((user) => ({
         ...user,
         ...user.data,
-        full_name: `${user.data.first_name ?? ''} ${user.data.middle_name ?? ''} ${user.data.last_name ?? ''}`,
-        client_role: getClientRole(user.role)
+        full_name: `${user.data.first_name ?? ""} ${user.data.middle_name ?? ""} ${user.data.last_name ?? ""}`,
+        client_role: getClientRole(user.role),
     }));
 };
 
 function getClientRole(supabase_user_role) {
-    if (supabase_user_role === 'service_role') return 'admin';
-    if (supabase_user_role === 'authenticated') return 'driver';
-    if (supabase_user_role === 'authenticated') return 'driver';
+    if (supabase_user_role === "service_role") return "admin";
+    if (supabase_user_role === "authenticated") return "driver";
+    if (supabase_user_role === "authenticated") return "driver";
 }
 
 const props = defineProps({
     role: {
         type: String,
-        default: null
-    }
-})
-
-defineEmits(['editUser']);
-
-defineExpose({
-    loadLazyData
+        default: null,
+    },
 });
 
-</script>
+defineEmits(["editUser"]);
 
+defineExpose({
+    loadLazyData,
+});
+</script>
 
 <template>
     <DataTable
@@ -78,10 +73,12 @@ defineExpose({
     >
         <template #header>
             <div class="flex justify-content-end">
-                <span class="p-input-icon-left">
-                    <i class="pi pi-search" />
+                <IconField iconPosition="left">
+                    <InputIcon>
+                        <i class="pi pi-search" />
+                    </InputIcon>
                     <InputText v-model="filters['global'].value" placeholder="Keyword Search" />
-                </span>
+                </IconField>
             </div>
         </template>
         <Column field="created_at" header="Date Created" sortable>
@@ -93,12 +90,12 @@ defineExpose({
         <Column field="full_name" header="Full Name" sortable></Column>
         <Column field="contact_number" header="Contact Number" sortable>
             <template #body="{ data }">
-                {{ data.contact_number ?? '-- not set --' }}
+                {{ data.contact_number ?? "-- not set --" }}
             </template>
         </Column>
         <Column field="birthday" header="Birthdate" sortable>
             <template #body="{ data }">
-                {{ data.birthday ? dayjs(data.birthday).format('MMMM DD, YYYY') : '-- not set --' }}
+                {{ data.birthday ? dayjs(data.birthday).format("MMMM DD, YYYY") : "-- not set --" }}
             </template>
         </Column>
         <Column field="role" header="Role" sortable></Column>
@@ -114,4 +111,3 @@ defineExpose({
         </Column>
     </DataTable>
 </template>
-

@@ -6,6 +6,7 @@ export const changeTheme = (theme, mode) => {
         theme,
         mode
     });
+
     const elementId = 'theme-css';
     const linkElement = document.getElementById(elementId);
     const cloneLinkElement = linkElement.cloneNode(true);

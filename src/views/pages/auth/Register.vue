@@ -1,21 +1,20 @@
 <script setup>
-import { useLayout } from '@/layout/composables/layout';
-import { computed, onMounted, ref } from 'vue';
-import { checkTheme } from '@/service/layout';
-import { isSignedIn, signUpUser, supabaseClient } from '@/service/supabase/supabase';
-import { useRouter } from 'vue-router';
-import DarkImageLogo from '@/assets/images/auto-park-for-dark.png';
-import LightImageLogo from '@/assets/images/auto-park-for-light.png';
-import { useToast } from 'primevue/usetoast';
+import { useLayout } from "@/layout/composables/layout";
+import { computed, onMounted, ref } from "vue";
+import { checkTheme } from "@/service/layout";
+import { isSignedIn, signUpUser, supabaseClient } from "@/service/supabase/supabase";
+import { useRouter } from "vue-router";
+import DarkImageLogo from "@/assets/images/auto-park-for-dark.png";
+import LightImageLogo from "@/assets/images/auto-park-for-light.png";
+import { useToast } from "primevue/usetoast";
+import { Loading } from "notiflix";
 
 const toast = useToast();
 const router = useRouter();
 const showError = ref(false);
-const showErrorMessage = ref('Error Message');
+const showErrorMessage = ref("Error Message");
 const { layoutConfig } = useLayout();
-const email = ref('');
-const password = ref('');
-const checked = ref(false);
+
 const form = ref({
     email: null,
     password: null,
@@ -30,7 +29,7 @@ const form = ref({
     city: null,
     barangay: null,
     street: null,
-    role: 'driver'
+    role: "driver",
 });
 
 const logoUrl = computed(() => {
@@ -40,12 +39,17 @@ const logoUrl = computed(() => {
 function isFormValid() {
     let invalid = 0;
     if (!form.value.first_name) {
-        toast.add({ severity: 'error', summary: 'Error', detail: 'First name is required' });
+        toast.add({ severity: "error", summary: "Error", detail: "First name is required" });
         invalid++;
     }
 
     if (!form.value.email) {
-        toast.add({ severity: 'error', summary: 'Error', detail: 'Email is required' });
+        toast.add({ severity: "error", summary: "Error", detail: "Email is required" });
+        invalid++;
+    }
+
+    if (!form.value.driver_license || form.value.driver_license.length !== 11) {
+        toast.add({ severity: "error", summary: "Error", detail: "Driver license is required" });
         invalid++;
     }
 
@@ -64,26 +68,31 @@ async function signUp() {
     }
 
     const theUserData = JSON.parse(JSON.stringify(form.value));
-    delete theUserData['password'];
+    delete theUserData["password"];
     const theUser = await supabaseClient.auth.getUser();
 
-    await supabaseClient
-        .from('user_profile')
-        .upsert({
+    Loading.standard("saving user profile...");
+
+    await supabaseClient.from("user_profile").upsert(
+        {
             user_id: theUser.data.user.id,
             data: theUserData,
-            role: 'driver'
-        }, { onConflict: 'user_id' });
+            role: "driver",
+        },
+        { onConflict: "user_id" }
+    );
 
-    toast.add({ severity: 'success', summary: 'Success', detail: 'Login successful', life: 3000 });
-    await router.push('/');
+    Loading.remove();
+
+    toast.add({ severity: "success", summary: "Success", detail: "Login successful", life: 3000 });
+    await router.push("/");
 }
 
 onMounted(async () => {
     checkTheme();
     if (await isSignedIn()) {
-        toast.add({ severity: 'info', summary: 'Info', detail: 'Already Subscribed', life: 3000 });
-        await router.push('/');
+        toast.add({ severity: "info", summary: "Info", detail: "Already Subscribed", life: 3000 });
+        await router.push("/");
     }
 });
 </script>
@@ -91,10 +100,8 @@ onMounted(async () => {
 <template>
     <div class="flex align-items-center justify-content-center min-h-screen min-w-screen overflow-hidden">
         <div class="flex flex-column align-items-center justify-content-center">
-            <div
-                class="my-3"
-                style="border-radius: 56px; padding: 0.3rem; background: linear-gradient(180deg, var(--primary-color) 10%, rgba(33, 150, 243, 0) 30%)">
-                <div class="w-full surface-card py-8 px-5 sm:px-8" style="border-radius: 53px">
+            <div class="my-3" style="border-radius: 56px; padding: 0.3rem; background: linear-gradient(180deg, var(--primary-color) 10%, rgba(33, 150, 243, 0) 30%)">
+                <div class="w-full surface-card py-8 px-5" style="border-radius: 53px">
                     <div class="text-center mb-5">
                         <img :src="logoUrl" alt="Sakai logo" class="mb-5 flex-shrink-0" />
                         <div class="text-900 text-3xl font-medium mb-3">Find Your Parking</div>
@@ -113,8 +120,7 @@ onMounted(async () => {
                             </div>
                             <div class="flex flex-column gap-2 mb-3">
                                 <label>Password</label>
-                                <Password v-model="form.password" placeholder="ex. 09503244478" required
-                                          style="display: grid" />
+                                <Password v-model="form.password" placeholder="ex. 09503244478" required style="display: grid" />
                             </div>
                         </div>
 
@@ -149,7 +155,6 @@ onMounted(async () => {
                             <InputText v-model="form.province" placeholder="ex. Cebu" />
                         </div>
                         <div class="flex flex-column gap-2 mb-3">
-
                             <label>City/Municipality</label>
                             <InputText v-model="form.city" placeholder="ex. Baguio" />
                         </div>
@@ -162,6 +167,21 @@ onMounted(async () => {
                             <InputText v-model="form.street" placeholder="ex. Blk. 1, " />
                         </div>
                         <div class="flex flex-column gap-2 mb-3">
+                            <label>Block No., Street, Village etc. *</label>
+                            <InputText v-model="form.street" placeholder="ex. Blk. 1, " />
+                        </div>
+                        <h3 class="mb-2">Drivers License</h3>
+                        <div>
+                            <InputOtp v-model="form.driver_license" :length="11" style="gap: 0; display: flex; align-items: center">
+                                <template #default="{ attrs, events, index }">
+                                    <input type="text" v-bind="attrs" v-on="events" class="custom-otp-input" />
+                                    <div v-if="index === 3 || index === 5" class="px-1">
+                                        <i class="pi pi-minus" />
+                                    </div>
+                                </template>
+                            </InputOtp>
+                        </div>
+                        <div class="flex flex-column gap-2 mb-3 mt-3">
                             <Button label="Submit" type="submit" />
                         </div>
                     </form>
@@ -180,5 +200,44 @@ onMounted(async () => {
 .pi-eye-slash {
     transform: scale(1.6);
     margin-right: 1rem;
+}
+
+.custom-otp-input {
+    width: 25px;
+    height: 48px;
+    font-size: 24px;
+    appearance: none;
+    text-align: center;
+    transition: all 0.2s;
+    border-radius: 0;
+    border: 1px solid var(--surface-400);
+    background: transparent;
+    outline-offset: -2px;
+    outline-color: transparent;
+    border-right: 0 none;
+    transition: outline-color 0.3s;
+    color: var(--text-color);
+    text-transform: uppercase;
+}
+
+.custom-otp-input:focus {
+    outline: 2px solid var(--primary-color);
+}
+
+.custom-otp-input:first-child,
+.custom-otp-input:nth-child(5),
+.custom-otp-input:nth-child(8) {
+    border-top-left-radius: 12px;
+    border-bottom-left-radius: 12px;
+}
+
+.custom-otp-input:nth-child(3),
+.custom-otp-input:nth-child(6),
+.custom-otp-input:last-child {
+    border-top-right-radius: 12px;
+    border-bottom-right-radius: 12px;
+    border-right-width: 1px;
+    border-right-style: solid;
+    border-color: var(--surface-400);
 }
 </style>
