@@ -10,8 +10,6 @@ const toast = useToast();
 const visible = ref(false);
 async function toggleModal(parking_slot_id) {
 
-    console.log(parking_slot_id)
-
     const {data, error} = await getOccupiedTheSlot(parking_slot_id);
 
     if (error) {

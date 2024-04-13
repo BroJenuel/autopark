@@ -2,6 +2,7 @@ import { createClient } from "@supabase/supabase-js";
 import { createUser, updateUser } from "@/service/supabase/table/user_details";
 import { useUserStore } from "@/store/userStore";
 import { createLog } from "./table/logs";
+import { updateParkingSlotStatus } from "@/service/supabase/table/parking_slot";
 
 export const userStorageKey = "autopark-user";
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
@@ -61,3 +62,7 @@ export const me = {};
 export const log = {
     createLog: createLog,
 };
+
+export const parkingSlot = {
+    updateParkingSlotStatus
+}
