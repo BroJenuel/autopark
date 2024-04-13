@@ -47,8 +47,14 @@ function badgeTypeStatus(status) {
     return "info";
 }
 
+const screenWidthSize = ref(window.innerWidth);
+
 onMounted(() => {
     getBookingList();
+
+    window.addEventListener("resize", () => {
+        screenWidthSize.value = window.innerWidth;
+    })
 });
 </script>
 
@@ -64,6 +70,7 @@ onMounted(() => {
                 </div>
             </div>
             <DataTable
+                v-if="screenWidthSize > 676"
                 v-model:filters="filters"
                 :globalFilterFields="['parking_slot.area', 'parking_slot.street', 'id', 'payment_method', 'status']"
                 :loading="loading"
@@ -146,6 +153,43 @@ onMounted(() => {
                     </template>
                 </Column>
             </DataTable>
+            <div v-else class="pt-5">
+                <div class="card" v-for="book in bookLists">
+                    <div>Date Created: {{ new Date(book.created_at).toLocaleString() }}</div>
+                    <div>
+                        <div>
+                            Area: <b>{{ book.parking_slot.area }}, {{ book.parking_slot.street }}</b>
+                        </div>
+                        <div>
+                            LatLng: <b>{{ book.parking_slot.latitude }} - {{ book.parking_slot.longitude }}</b>
+                        </div>
+                    </div>
+                    <div>Status: <Badge :severity="badgeTypeStatus(book.status)" :value="book.status"></Badge></div>
+                    <div>Time Started: {{ dayjs(book.time_started).format("YYYY-MM-DD hh:mm a") }}</div>
+                    <div>Time Ended: {{ book.time_ended ? dayjs(book.time_ended).format("YYYY-MM-DD hh:mm a") : "--" }}</div>
+                    <div>Amount: <b>{{ book.payment_amount.toLocaleString("en-PH", { style: "currency", currency: "PHP" }) }}</b></div>
+                    <div>
+                        Payment Method: <Badge v-if="book.payment_method === 'cod'">Cash On Hand</Badge>
+                        <img
+                            v-else-if="book.payment_method === 'gcash'"
+                            :src="GCashLogo"
+                            alt=""
+                            class="bg-white p-1"
+                            width="60"
+                            style="border-radius: 8px"
+                        />
+                        <div v-else>--</div>
+                    </div>
+                    <Button
+                        v-if="!(book.payment_amount > 0)"
+                        icon="pi pi-money-bill"
+                        label="Pay"
+                        rounded
+                        severity="warning"
+                        @click="PayBookingModalRef.toggleModal(book)"
+                    />
+                </div>
+            </div>
         </div>
     </div>
 </template>

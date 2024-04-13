@@ -7,11 +7,15 @@ import AppConfig from './AppConfig.vue';
 import { useLayout } from '@/layout/composables/layout';
 import { isSignedIn } from '@/service/supabase/supabase';
 import { useRouter } from 'vue-router';
+import { useUserStore } from "@/store/userStore";
+import DriverWarningDialog from "@/components/DialogWarnings/DriverWarningDialog.vue";
 
+const DriverWarningDialogRef = ref(null);
 const AppConfigRef = ref()
 const router = useRouter();
 const { layoutConfig, layoutState, isSidebarActive } = useLayout();
 const outsideClickListener = ref(null);
+const userStore = useUserStore();
 
 watch(isSidebarActive, (newVal) => {
     if (newVal) {
@@ -61,10 +65,15 @@ const isOutsideClicked = (event) => {
 
 onBeforeMount(async () => {
     if(!(await isSignedIn())) await router.push('/auth/login');
+
+    if (userStore.role === 'driver') {
+        DriverWarningDialogRef.value.showDialog();
+    }
 })
 </script>
 
 <template>
+    <DriverWarningDialog ref="DriverWarningDialogRef" />
     <div class="layout-wrapper" :class="containerClass">
         <AppTopbar @changeTheme="AppConfigRef.toggleThemeConfig()"></AppTopbar>
         <div class="layout-sidebar">

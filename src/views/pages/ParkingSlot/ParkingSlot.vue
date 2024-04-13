@@ -4,13 +4,15 @@ import { getParkingSlots } from "@/service/supabase/table/parking_slot";
 import StoreParkingSlot from "@/components/ParkingSlot/StoreParkingSlot.vue";
 import { useToast } from "primevue/usetoast";
 import { FilterMatchMode } from "primevue/api";
+import ShowOccupiedModal from "@/components/ParkingSlot/ShowOccupiedModal.vue";
 
 const loading = ref(false);
 const toast = useToast();
 const StoreParkingSlotRef = ref();
+const ShowOccupiedModalRef = ref();
 const parkingSlots = ref([]);
 const filters = ref({
-    global: { value: null, matchMode: FilterMatchMode.CONTAINS },
+    global: { value: null, matchMode: FilterMatchMode.CONTAINS }
 });
 
 async function getParkingSlotLists() {
@@ -40,6 +42,7 @@ onMounted(async () => {
 const products = ref();
 </script>
 <template>
+    <ShowOccupiedModal ref="ShowOccupiedModalRef" />
     <StoreParkingSlot ref="StoreParkingSlotRef" @stored="getParkingSlotLists" />
     <div class="card">
         <div class="flex justify-content-between align-items-center">
@@ -51,12 +54,12 @@ const products = ref();
         </div>
         <DataTable
             v-model:filters="filters"
-            sortField="created_at"
+            :globalFilterFields="['area', 'street', 'latitude', 'longitude', 'status']"
+            :loading="loading"
             :sortOrder="-1"
             :value="parkingSlots"
+            sortField="created_at"
             tableStyle="min-width: 50rem"
-            :loading="loading"
-            :globalFilterFields="['area', 'street', 'latitude', 'longitude', 'status']"
         >
             <template #header>
                 <div class="flex justify-content-end">
@@ -66,18 +69,24 @@ const products = ref();
                     </span>
                 </div>
             </template>
-            <Column field="created_at" sortable header="Date Created">
+            <Column field="created_at" header="Date Created" sortable>
                 <template #body="slotProps">
                     {{ new Date(slotProps.data.created_at).toLocaleString() }}
                 </template>
             </Column>
-            <Column field="area" sortable header="Area"></Column>
-            <Column field="street" sortable header="Street"></Column>
-            <Column field="latitude" sortable header="Latitude"></Column>
-            <Column field="longitude" sortable header="Longitude"></Column>
-            <Column field="status" sortable header="Status">
+            <Column field="area" header="Area" sortable></Column>
+            <Column field="street" header="Street" sortable></Column>
+            <Column field="latitude" header="Latitude" sortable></Column>
+            <Column field="longitude" header="Longitude" sortable></Column>
+            <Column field="status" header="Status" sortable>
                 <template #body="slotProps">
-                    <Badge :value="slotProps.data.status" :severity="badgeTypeStatus(slotProps.data.status)"></Badge>
+                    <Badge v-if="slotProps.data.status === 'occupied'"
+                           :severity="badgeTypeStatus(slotProps.data.status)" :value="slotProps.data.status"
+                           style="cursor: pointer;"
+                           @click="ShowOccupiedModalRef.toggleModal(slotProps.data.id)"
+                    ></Badge>
+                    <Badge v-else :severity="badgeTypeStatus(slotProps.data.status)" :value="slotProps.data.status"
+                    ></Badge>
                 </template>
             </Column>
             <Column header="Action">
