@@ -2,3 +2,43 @@
     <Toast />
     <router-view />
 </template>
+<style>
+.custom-otp-input {
+    width: 30px;
+    height: 48px;
+    font-size: 24px;
+    appearance: none;
+    text-align: center;
+    transition: all 0.2s;
+    border-radius: 0;
+    border: 1px solid var(--surface-400);
+    background: transparent;
+    outline-offset: -2px;
+    outline-color: transparent;
+    border-right: 0 none;
+    transition: outline-color 0.3s;
+    color: var(--text-color);
+    text-transform: uppercase;
+}
+
+.custom-otp-input:focus {
+    outline: 2px solid var(--primary-color);
+}
+
+.custom-otp-input:first-child,
+.custom-otp-input:nth-child(5),
+.custom-otp-input:nth-child(8) {
+    border-top-left-radius: 12px;
+    border-bottom-left-radius: 12px;
+}
+
+.custom-otp-input:nth-child(3),
+.custom-otp-input:nth-child(6),
+.custom-otp-input:last-child {
+    border-top-right-radius: 12px;
+    border-bottom-right-radius: 12px;
+    border-right-width: 1px;
+    border-right-style: solid;
+    border-color: var(--surface-400);
+}
+</style>

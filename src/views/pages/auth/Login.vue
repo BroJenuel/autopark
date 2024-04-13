@@ -1,20 +1,20 @@
 <script setup>
-import { useLayout } from '@/layout/composables/layout';
-import { computed, onMounted, ref } from 'vue';
-import { checkTheme } from '@/service/layout';
-import { isSignedIn, signInUser } from '@/service/supabase/supabase';
-import { useRouter } from 'vue-router';
-import DarkImageLogo from '@/assets/images/auto-park-for-dark.png';
-import LightImageLogo from '@/assets/images/auto-park-for-light.png';
-import { useToast } from 'primevue/usetoast';
+import { useLayout } from "@/layout/composables/layout";
+import { computed, onMounted, ref } from "vue";
+import { checkTheme } from "@/service/layout";
+import { isSignedIn, signInUser } from "@/service/supabase/supabase";
+import { useRouter } from "vue-router";
+import DarkImageLogo from "@/assets/images/auto-park-for-dark.png";
+import LightImageLogo from "@/assets/images/auto-park-for-light.png";
+import { useToast } from "primevue/usetoast";
 
 const toast = useToast();
 const router = useRouter();
 const showError = ref(false);
-const showErrorMessage = ref('Error Message');
+const showErrorMessage = ref("Error Message");
 const { layoutConfig } = useLayout();
-const email = ref('');
-const password = ref('');
+const email = ref("");
+const password = ref("");
 const checked = ref(false);
 
 const logoUrl = computed(() => {
@@ -25,27 +25,27 @@ async function SignIn() {
     showError.value = false;
     if (!email.value || !password.value) {
         showError.value = true;
-        showErrorMessage.value = 'Please enter email and password';
+        showErrorMessage.value = "Please enter email and password";
         return;
     }
 
     const { error } = await signInUser(email.value, password.value);
 
     if (error) {
-        console.log('error')
-        toast.add({ severity: 'error', summary: 'Error', detail: error.message, life: 8000 });
+        console.log("error");
+        toast.add({ severity: "error", summary: "Error", detail: error.message, life: 8000 });
         return;
     }
 
-    toast.add({ severity: 'success', summary: 'Success', detail: 'Login successful', life: 3000 });
-    await router.push('/');
+    toast.add({ severity: "success", summary: "Success", detail: "Login successful", life: 3000 });
+    await router.push("/");
 }
 
 onMounted(async () => {
     checkTheme();
     if (await isSignedIn()) {
-        toast.add({ severity: 'info', summary: 'Info', detail: 'Already Subscribed', life: 3000 });
-        await router.push('/');
+        toast.add({ severity: "info", summary: "Info", detail: "Already Subscribed", life: 3000 });
+        await router.push("/");
     }
 });
 </script>
@@ -55,7 +55,12 @@ onMounted(async () => {
         <div class="flex flex-column align-items-center justify-content-center">
             <div
                 class="my-3"
-                style="border-radius: 56px; padding: 0.3rem; background: linear-gradient(180deg, var(--primary-color) 10%, rgba(33, 150, 243, 0) 30%)">
+                style="
+                    border-radius: 56px;
+                    padding: 0.3rem;
+                    background: linear-gradient(180deg, var(--primary-color) 10%, rgba(33, 150, 243, 0) 30%);
+                "
+            >
                 <div class="w-full surface-card py-8 px-5 sm:px-8" style="border-radius: 53px">
                     <div class="text-center mb-5">
                         <img :src="logoUrl" alt="Sakai logo" class="mb-5 flex-shrink-0" />
@@ -65,9 +70,15 @@ onMounted(async () => {
                     <Message v-show="showError" severity="error">{{ showErrorMessage }}</Message>
                     <div>
                         <label class="block text-900 text-xl font-medium mb-2" for="email1">Email</label>
-                        <InputText id="email1" v-model="email" class="w-full md:w-30rem mb-5"
-                                   placeholder="Email address"
-                                   style="padding: 1rem" type="text" @update:modelValue="showError = false" />
+                        <InputText
+                            id="email1"
+                            v-model="email"
+                            class="w-full md:w-30rem mb-5"
+                            placeholder="Email address"
+                            style="padding: 1rem"
+                            type="text"
+                            @update:modelValue="showError = false"
+                        />
 
                         <label class="block text-900 font-medium text-xl mb-2" for="password1">Password</label>
                         <Password
@@ -85,14 +96,22 @@ onMounted(async () => {
                         <div class="flex align-items-center justify-content-between mb-5 gap-5">
                             <div class="flex align-items-center">
                                 <Checkbox id="rememberme1" v-model="checked" binary class="mr-2"></Checkbox>
-                                <label for="rememberme1">Remember me</label>
+                                <label for="rememberme1"> Remember me </label>
                             </div>
-                            <a class="font-medium no-underline ml-2 text-right cursor-pointer"
-                               style="color: var(--primary-color)">Forgot password?</a>
+                            <a
+                                class="font-medium no-underline ml-2 text-right cursor-pointer"
+                                style="color: var(--primary-color)"
+                            >
+                                Forgot password?
+                            </a>
                         </div>
                         <Button class="w-full p-3 text-xl mb-2" label="Sign In" @click="SignIn()"></Button>
-                        <Button class="w-full p-3 text-xl" label="Create Account" text
-                                @click="router.push('/auth/register')" />
+                        <Button
+                            class="w-full p-3 text-xl"
+                            label="Create Account"
+                            text
+                            @click="router.push('/auth/register')"
+                        />
                     </div>
                 </div>
             </div>
