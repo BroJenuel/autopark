@@ -178,6 +178,11 @@ const router = createRouter({
                             path: 'incident-report',
                             name: 'Incident Report',
                             component: () => import('@/views/pages/Report/IncidentReport.vue')
+                        },
+                        {
+                            path: 'logs',
+                            name: 'Logs',
+                            component: () => import('@/views/pages/Report/Logs.vue')
                         }
                     ],
                     beforeEnter: adminAndTeamLeaderOnly

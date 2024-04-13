@@ -1,10 +1,11 @@
 <script setup>
 import { ref } from "vue";
-import { user } from "@/service/supabase/supabase";
+import { log, user } from "@/service/supabase/supabase";
 import { Loading } from "notiflix";
 import { useToast } from "primevue/usetoast";
 import dayjs from "dayjs";
 
+const oldData = ref(null)
 const toast = useToast();
 const props = defineProps({
     role: String,
@@ -46,8 +47,8 @@ function isFormValid() {
         invalid++;
     }
 
-    if ((form.value.role === "driver" && !form.value.driver_license) || form.value.driver_license.length !== 11) {
-        toast.add({ severity: "error", summary: "Error", detail: "Driver license is required", life: 3000 });
+    if (form.value.role === "driver" && (!form.value.driver_license || form.value.driver_license.length !== 11)) {
+        toast.add({ severity: "error", summary: "Error", detail: "Driver license is required or invalid", life: 3000 });
         invalid++;
     }
 
@@ -67,6 +68,9 @@ async function submit() {
         const data = JSON.parse(JSON.stringify(form.value));
 
         const storedUser = await user.create(data);
+
+        await log.createLog('user', 'create', data, oldData.value);
+
         emit("userStored", storedUser);
     } catch (error) {
         toast.add({ severity: "error", summary: "Error", detail: error });

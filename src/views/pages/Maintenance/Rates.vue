@@ -1,9 +1,10 @@
 <script setup>
 import { onMounted, ref } from 'vue';
 import { Loading } from 'notiflix';
-import { supabaseClient } from '@/service/supabase/supabase';
+import { log, supabaseClient } from "@/service/supabase/supabase";
 import { useToast } from 'primevue/usetoast';
 
+const oldData = ref(null);
 const toast = useToast();
 const form = ref({
     id: 1,
@@ -25,6 +26,9 @@ async function save() {
         toast.add({ severity: 'error', summary: 'Error', detail: error.message, life: 10000 });
         return
     }
+
+    await log.createLog('maintenance', 'update', form.value, oldData.value);
+    oldData.value = JSON.parse(JSON.stringify(form.value));
 
     toast.add({ severity: 'success', summary: 'Success', detail: 'Settings saved', life: 2500 });
 }
@@ -48,6 +52,7 @@ async function getSetting() {
     }
 
     form.value = data;
+    oldData.value = JSON.parse(JSON.stringify(data));
 }
 
 onMounted(() => {

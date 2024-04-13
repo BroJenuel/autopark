@@ -1,17 +1,18 @@
 <script setup>
-import { ref } from 'vue';
-import { createParkingSlot, updateParkingSlot } from '@/service/supabase/table/parking_slot';
-import { Loading } from 'notiflix';
-import { removeEmpty } from '@/utils/objects';
-import { supabaseClient } from '@/service/supabase/supabase';
-import { useToast } from 'primevue/usetoast';
-import { useUserStore } from '@/store/userStore';
-import GetLatAndLongInMap from '@/components/ParkingSlot/GetLatAndLongInMap.vue';
+import { ref } from "vue";
+import { createParkingSlot, updateParkingSlot } from "@/service/supabase/table/parking_slot";
+import { Loading } from "notiflix";
+import { removeEmpty } from "@/utils/objects";
+import { log, supabaseClient } from "@/service/supabase/supabase";
+import { useToast } from "primevue/usetoast";
+import { useUserStore } from "@/store/userStore";
+import GetLatAndLongInMap from "@/components/ParkingSlot/GetLatAndLongInMap.vue";
 
+const oldData = ref(null);
 const GetLatAndLongInMapRef = ref();
 const userStore = useUserStore();
 const toast = useToast();
-const emits = defineEmits(['stored']);
+const emits = defineEmits(["stored"]);
 const showModal = ref(false);
 const form = ref({
     id: null,
@@ -19,13 +20,13 @@ const form = ref({
     street: null,
     latitude: null,
     longitude: null,
-    status: 'available'
+    status: "available"
 });
 
 const statusOptions = [
-    { name: 'Available', code: 'available' },
-    { name: 'Occupied', code: 'occupied' },
-    { name: 'Not Available', code: 'not_available' }
+    { name: "Available", code: "available" },
+    { name: "Occupied", code: "occupied" },
+    { name: "Not Available", code: "not_available" }
 ];
 
 const streetOptionLoading = ref(false);
@@ -33,40 +34,42 @@ const streets = ref([]);
 
 async function getStreets() {
     streetOptionLoading.value = true;
-    const { data, error } = await supabaseClient
-        .from('streets')
-        .select();
+    const { data, error } = await supabaseClient.from("streets").select();
 
     streetOptionLoading.value = false;
 
     if (error) {
-        toast.add({ severity: 'error', summary: 'Error', detail: error.message, life: 3000 });
+        toast.add({ severity: "error", summary: "Error", detail: error.message, life: 3000 });
         return;
     }
 
-    streets.value = data.map(d => ({ name: d.name, code: d.name }));
+    streets.value = data.map((d) => ({ name: d.name, code: d.name }));
 }
 
-function toggleModal(data = {
-    id: null,
-    area: null,
-    street: null,
-    latitude: null,
-    longitude: null,
-    status: 'available'
-}) {
-    if (data != null) form.value = data;
+function toggleModal(
+    data = {
+        id: null,
+        area: null,
+        street: null,
+        latitude: null,
+        longitude: null,
+        status: "available"
+    }
+) {
+    if (data != null) {
+        form.value = data;
+        oldData.value = JSON.parse(JSON.stringify(data));
+    }
     showModal.value = !showModal.value;
     getStreets();
 }
-
 
 async function submit() {
     const isUpdate = form.value.id != null;
 
     const params = removeEmpty(form.value);
 
-    Loading.standard(form.value.id ? 'Updating Parking Slot' : 'Adding New Parking Slot');
+    Loading.standard(form.value.id ? "Updating Parking Slot" : "Adding New Parking Slot");
 
     let parkingSlot;
 
@@ -74,12 +77,14 @@ async function submit() {
     else parkingSlot = await updateParkingSlot(params);
 
     if (parkingSlot.error) {
-        toast.add({ severity: 'error', summary: 'Error', detail: parkingSlot.error.message, life: 3000 });
+        toast.add({ severity: "error", summary: "Error", detail: parkingSlot.error.message, life: 3000 });
         Loading.remove();
         return;
     }
 
-    emits('stored', parkingSlot);
+    await log.createLog("parking", isUpdate ? "update" : "create", params, oldData.value);
+
+    emits("stored", parkingSlot);
     Loading.remove();
     toggleModal();
 }
@@ -92,7 +97,7 @@ defineExpose({
 <template>
     <GetLatAndLongInMap
         ref="GetLatAndLongInMapRef"
-        @selected="({ latitude, longitude }) => (form.latitude = latitude, form.longitude = longitude)"
+        @selected="({ latitude, longitude }) => ((form.latitude = latitude), (form.longitude = longitude))"
     />
     <Dialog
         v-model:visible="showModal"
@@ -107,9 +112,10 @@ defineExpose({
                 <InputText v-model="form.area" placeholder="ex. example@gmail.com" required />
             </div>
             <div class="flex flex-column gap-2 mb-3">
-                <label>Street
-                    <RouterLink v-if="userStore.role === 'admin'" class="text-blue-500" to="/maintenance/street">Manage
-                        Streets
+                <label
+                >Street
+                    <RouterLink v-if="userStore.role === 'admin'" class="text-blue-500" to="/maintenance/street"
+                    >Manage Streets
                     </RouterLink>
                 </label>
                 <Dropdown
@@ -124,9 +130,14 @@ defineExpose({
                 />
             </div>
             <div class="flex flex-column gap-2 mb-3">
-                <label>Latitude
-                    <Button class="py-0 px-1" label="Set Lat & Long" size="small"
-                            @click="GetLatAndLongInMapRef.toggleModal(form.latitude, form.longitude)" />
+                <label>
+                    Latitude
+                    <Button
+                        class="py-0 px-1"
+                        label="Set Lat & Long"
+                        size="small"
+                        @click="GetLatAndLongInMapRef.toggleModal(form.latitude, form.longitude)"
+                    />
                 </label>
                 <InputText v-model="form.latitude" placeholder="ex. 16.411697048290645" required />
             </div>

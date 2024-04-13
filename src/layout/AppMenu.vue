@@ -51,6 +51,7 @@ const adminModal = [
                     { label: "Online Payment", icon: "pi pi-fw pi-file", to: "/reports/online-payment" },
                     { label: "Manual Payment", icon: "pi pi-fw pi-file", to: "/reports/manual-payment" },
                     { label: "Incident Report", icon: "pi pi-fw pi-file", to: "/reports/incident-report" },
+                    { label: "Logs", icon: "pi pi-fw pi-file", to: "/reports/logs" },
                 ],
             },
         ],

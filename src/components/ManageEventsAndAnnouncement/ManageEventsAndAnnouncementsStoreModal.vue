@@ -1,11 +1,12 @@
 <script setup>
-import { ref } from 'vue';
-import { useToast } from 'primevue/usetoast';
-import { supabaseClient } from '@/service/supabase/supabase';
-import { getFileExtension } from '@/utils/file';
+import { ref } from "vue";
+import { useToast } from "primevue/usetoast";
+import { log, supabaseClient } from "@/service/supabase/supabase";
+import { getFileExtension } from "@/utils/file";
 
+const oldData = ref(null);
 const toast = useToast();
-const emits = defineEmits(['stored']);
+const emits = defineEmits(["stored"]);
 const showModal = ref(false);
 const form = ref({
     id: null,
@@ -13,17 +14,17 @@ const form = ref({
     description: null,
     image: null,
     type: null,
-    status: 'active'
+    status: "active"
 });
 
 const eventsAnnouncementTypeOptions = [
-    { name: 'Announcement', code: 'announcement' },
-    { name: 'Event', code: 'event' }
+    { name: "Announcement", code: "announcement" },
+    { name: "Event", code: "event" }
 ];
 
 const eventsAnnouncementStatusOptions = [
-    { name: 'Active', code: 'active' },
-    { name: 'Inactive', code: 'inactive' }
+    { name: "Active", code: "active" },
+    { name: "Inactive", code: "inactive" }
 ];
 
 function toggleModal(data = {
@@ -32,9 +33,12 @@ function toggleModal(data = {
     description: null,
     image: null,
     type: null,
-    status: 'active'
+    status: "active"
 }) {
-    if (data != null) form.value = data;
+    if (data != null) {
+        form.value = data;
+        oldData.value = data;
+    }
     showModal.value = !showModal.value;
 }
 
@@ -44,9 +48,9 @@ async function submit() {
 
     if (!form.value.type || !form.value.status) {
         toast.add({
-            severity: 'error',
-            summary: 'Error',
-            detail: 'Please select an event type or status',
+            severity: "error",
+            summary: "Error",
+            detail: "Please select an event type or status",
             life: 3000
         });
         return;
@@ -57,8 +61,8 @@ async function submit() {
     const uploadImage = form.value.image
         ? await supabaseClient
             .storage
-            .from('public storage')
-            .upload('images/events/' + (Date.now()) + '-' + getFileExtension(form.value.image.name), form.value.image)
+            .from("public storage")
+            .upload("images/events/" + (Date.now()) + "-" + getFileExtension(form.value.image.name), form.value.image)
         : null;
 
     const dataParams = {
@@ -71,24 +75,26 @@ async function submit() {
 
     // then add the data
     const addEventAnnouncement = isUpdate ? await supabaseClient
-            .from('events_announcements')
+            .from("events_announcements")
             .update(dataParams)
-            .eq('id', form.value.id)
+            .eq("id", form.value.id)
             .select()
         : await supabaseClient
-            .from('events_announcements')
+            .from("events_announcements")
             .insert(dataParams)
             .select();
 
     if (addEventAnnouncement.error) {
         toast.add({
-            severity: 'error',
-            summary: 'Error',
+            severity: "error",
+            summary: "Error",
             detail: addEventAnnouncement.error
         });
     }
 
-    emits('stored', addEventAnnouncement.data);
+    await log.createLog("announcements", isUpdate ? "update" : "create", dataParams, oldData.value);
+
+    emits("stored", addEventAnnouncement.data);
     toggleModal();
 }
 
@@ -120,8 +126,10 @@ defineExpose({
             </div>
             <div class="flex flex-column gap-2 mb-3">
                 <label>Select Image</label>
-                <FileUpload accept="image/*" mode="basic" @select="customBase64Uploader"   />
-                <img v-if="form.image && form.image.data" :src="`https://hqymkslkcmsenuymkgej.supabase.co/storage/v1/object/public/${form.image.data.fullPath}`"  width="150px" alt=""/>
+                <FileUpload accept="image/*" mode="basic" @select="customBase64Uploader" />
+                <img v-if="form.image && form.image.data"
+                     :src="`https://hqymkslkcmsenuymkgej.supabase.co/storage/v1/object/public/${form.image.data.fullPath}`"
+                     alt="" width="150px" />
             </div>
             <div class="flex flex-column gap-2 mb-3">
                 <label>Type</label>

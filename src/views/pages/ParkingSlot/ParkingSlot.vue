@@ -1,11 +1,11 @@
 <script setup>
-import { onMounted, ref } from 'vue';
-import { getParkingSlots } from '@/service/supabase/table/parking_slot';
-import StoreParkingSlot from '@/components/ParkingSlot/StoreParkingSlot.vue';
-import { useToast } from 'primevue/usetoast';
-import { FilterMatchMode } from 'primevue/api';
+import { onMounted, ref } from "vue";
+import { getParkingSlots } from "@/service/supabase/table/parking_slot";
+import StoreParkingSlot from "@/components/ParkingSlot/StoreParkingSlot.vue";
+import { useToast } from "primevue/usetoast";
+import { FilterMatchMode } from "primevue/api";
 
-const loading = ref(false)
+const loading = ref(false);
 const toast = useToast();
 const StoreParkingSlotRef = ref();
 const parkingSlots = ref([]);
@@ -14,23 +14,23 @@ const filters = ref({
 });
 
 async function getParkingSlotLists() {
-    loading.value = true
+    loading.value = true;
     const { data, error } = await getParkingSlots();
 
     if (error) {
-        toast.add({ severity: 'error', summary: 'Error', detail: error.message });
+        toast.add({ severity: "error", summary: "Error", detail: error.message });
         return;
     }
 
     parkingSlots.value = data;
-    loading.value = false
+    loading.value = false;
 }
 
 function badgeTypeStatus(status) {
-    if (status === 'available') return 'success';
-    if (status === 'occupied') return 'warning';
-    if (status === 'not_available') return 'danger';
-    return 'info';
+    if (status === "available") return "success";
+    if (status === "occupied") return "warning";
+    if (status === "not_available") return "danger";
+    return "info";
 }
 
 onMounted(async () => {
@@ -38,7 +38,6 @@ onMounted(async () => {
 });
 
 const products = ref();
-
 </script>
 <template>
     <StoreParkingSlot ref="StoreParkingSlotRef" @stored="getParkingSlotLists" />
@@ -67,16 +66,16 @@ const products = ref();
                     </span>
                 </div>
             </template>
-            <Column field="created_at" sortable  header="Date Created">
+            <Column field="created_at" sortable header="Date Created">
                 <template #body="slotProps">
                     {{ new Date(slotProps.data.created_at).toLocaleString() }}
                 </template>
             </Column>
-            <Column field="area" sortable  header="Area"></Column>
-            <Column field="street" sortable  header="Street"></Column>
-            <Column field="latitude" sortable  header="Latitude"></Column>
-            <Column field="longitude" sortable  header="Longitude"></Column>
-            <Column field="status" sortable  header="Status">
+            <Column field="area" sortable header="Area"></Column>
+            <Column field="street" sortable header="Street"></Column>
+            <Column field="latitude" sortable header="Latitude"></Column>
+            <Column field="longitude" sortable header="Longitude"></Column>
+            <Column field="status" sortable header="Status">
                 <template #body="slotProps">
                     <Badge :value="slotProps.data.status" :severity="badgeTypeStatus(slotProps.data.status)"></Badge>
                 </template>

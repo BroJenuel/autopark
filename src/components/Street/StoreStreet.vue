@@ -1,8 +1,9 @@
 <script setup>
 import { ref } from 'vue';
 import { Loading } from 'notiflix';
-import { supabaseClient } from '@/service/supabase/supabase';
+import { log, supabaseClient } from "@/service/supabase/supabase";
 
+const oldData = ref(null);
 const emits = defineEmits(['stored']);
 const showModal = ref(false);
 const form = ref({
@@ -14,7 +15,10 @@ function toggleModal(data = {
     id: null,
     name: null
 }) {
-    if (data != null) form.value = JSON.parse(JSON.stringify(data));
+    if (data != null) {
+        form.value = JSON.parse(JSON.stringify(data));
+        oldData.value = JSON.parse(JSON.stringify(data));
+    }
     showModal.value = !showModal.value;
 }
 
@@ -43,6 +47,8 @@ async function submit() {
         toast.add({ severity: 'error', summary: 'Error', detail: storedStreet.error.message });
         return;
     }
+
+    await log.createLog('maintenance', isUpdate ? 'update' : 'create', dataParams, oldData.value);
 
     emits('stored', storedStreet.data);
     toggleModal();
