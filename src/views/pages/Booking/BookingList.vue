@@ -9,6 +9,7 @@ import dayjs from "dayjs";
 import PayBookingModal from "@/components/BookingList/PayBookModal.vue";
 import GCashLogo from "@/assets/images/gcash logo.png";
 import { autoParkPaymentMethods } from "@/utils/payment";
+import { Confirm, Loading } from "notiflix";
 
 const PayBookingModalRef = ref(false);
 const loading = ref(false);
@@ -92,6 +93,47 @@ function isAboutToEnd(booking) {
         return false;
     }
     return false;
+}
+
+async function cancelBooking(booking) {
+    const parkingSlotId = booking.parking_slot_id;
+
+    Confirm.show(
+        "Cancel this booking?",
+        "Are you sure you want to cancel this booking?",
+        "Yes",
+        "No",
+        async () => {
+            Loading.standard();
+
+            const bookingList = await supabaseClient
+                .from('parking_slot')
+                .update({
+                    status: 'available',
+                })
+                .eq('id', parkingSlotId)
+                .select();
+
+            const bookingListSlot = await supabaseClient
+                .from('parking_slot_booking')
+                .update({
+                    time_ended: new Date(),
+                })
+                .eq('parking_slot_id', parkingSlotId)
+                .select();
+
+            await getBookingList();
+
+            Loading.remove();
+        },
+        () => {},
+        {
+            okButtonBackground: "rgb(255 0 0 / 50%)",
+            titleColor: "red",
+        }
+    )
+
+
 }
 </script>
 
@@ -197,6 +239,15 @@ function isAboutToEnd(booking) {
                             severity="secondary"
                             @click="PayBookingModalRef.toggleModal(data)"
                         />
+                        <Button
+                            v-if="!(data.payment_amount > 0) && data.status !== 'Closed' && data.status !== 'Done'"
+                            icon="pi pi-money-bill"
+                            label="Cancel Booking"
+                            rounded
+                            severity="danger"
+                            class="mt-2"
+                            @click="cancelBooking(data)"
+                        />
                     </template>
                 </Column>
             </DataTable>
@@ -246,6 +297,15 @@ function isAboutToEnd(booking) {
                         rounded
                         severity="secondary"
                         @click="PayBookingModalRef.toggleModal(book)"
+                    />
+                    <Button
+                        v-if="!(data.payment_amount > 0) && data.status !== 'Closed' && book.status !== 'Done'"
+                        icon="pi pi-money-bill"
+                        label="Cancel Booking"
+                        rounded
+                        severity="danger"
+                        class="mt-2"
+                        @click="cancelBooking(data)"
                     />
                 </div>
             </div>
