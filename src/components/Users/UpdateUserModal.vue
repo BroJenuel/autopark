@@ -6,7 +6,7 @@ import { useToast } from "primevue/usetoast";
 import dayjs from "dayjs";
 import { isMobileNumberValid } from "../../utils/formValidator";
 
-const oldData = ref(null)
+const oldData = ref(null);
 const toast = useToast();
 const props = defineProps({
     role: String,
@@ -102,7 +102,7 @@ async function submit() {
 
         const storedUser = await user.update(data);
 
-        await log.createLog('user', 'update', data, oldData.value);
+        await log.createLog("user", "update", data, oldData.value);
 
         form.value = {
             id: null,
