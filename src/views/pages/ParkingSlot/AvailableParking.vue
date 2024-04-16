@@ -26,7 +26,6 @@ async function getAvailableParkingSlots() {
     }
 
     availableSlots.value = data;
-    console.log(availableSlots.value);
     setMap();
 }
 

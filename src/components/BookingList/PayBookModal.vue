@@ -1,10 +1,9 @@
 <script setup>
-import { computed, ref } from 'vue';
-import dayjs from 'dayjs';
-import { Loading } from 'notiflix';
-import { supabaseClient } from '@/service/supabase/supabase';
-import GCashLogo from '@/assets/images/gcash logo.png';
-import { useToast } from 'primevue/usetoast';
+import { computed, ref } from "vue";
+import dayjs from "dayjs";
+import { Loading } from "notiflix";
+import { supabaseClient } from "@/service/supabase/supabase";
+import { useToast } from "primevue/usetoast";
 
 const toast = useToast();
 const showModal = ref(false);
@@ -19,19 +18,19 @@ async function toggleModal(arg) {
 }
 
 async function getRating() {
-    Loading.standard('getting settings...');
+    Loading.standard("getting settings...");
 
     const { data, error } = await supabaseClient
-        .from('settings')
+        .from("settings")
         .select()
-        .eq('id', 1)
+        .eq("id", 1)
         .limit(1)
         .single();
 
     Loading.remove();
 
     if (error) {
-        toast.add({ severity: 'error', summary: 'Error', detail: error.message, life: 2000 });
+        toast.add({ severity: "error", summary: "Error", detail: error.message, life: 2000 });
         return;
     }
 
@@ -71,53 +70,52 @@ const total = computed(() => {
 const computation = computed(() => {
     let total = 0;
     let hrs = hours.value;
-    let explanation = '';
+    let explanation = "";
 
     if (hrs > 2) {
         total += 50;
-        explanation += `first 2 Hours is ${(50).toLocaleString('en-PH', { style: 'currency', currency: 'PHP' })}.`;
+        explanation += `first 2 Hours is ${(50).toLocaleString("en-PH", { style: "currency", currency: "PHP" })}.`;
         hrs -= 2;
         total += hrs * (rating.value.exceed_rate_per_hour);
-        explanation += ` ${hrs} Exceeding Hours  is ${(hrs * (rating.value.exceed_rate_per_hour)).toLocaleString('en-PH', {
-            style: 'currency',
-            currency: 'PHP'
+        explanation += ` ${hrs} Exceeding Hours  is ${(hrs * (rating.value.exceed_rate_per_hour)).toLocaleString("en-PH", {
+            style: "currency",
+            currency: "PHP"
         })}`; //'Exceeding Hours is ' + hrs + ' ' + (hrs * (rating.value.exceed_rate_per_hour));
         return explanation;
     } else {
-        return 'First Two Hours is 50';
+        return "First Two Hours is 50";
     }
 });
 
-async function submitPayment(paymentMethod) {
-    if (!confirm('Are you sure you want to proceed payment? make sure you have available balance')) {
-        toast.add({ severity: 'warn', summary: 'Cancelled.', detail: 'Transaction cancelled', life: 2000 });
+async function submitPayment() {
+    if (!confirm("Are you sure you want to proceed payment? make sure you have available balance")) {
+        toast.add({ severity: "warn", summary: "Cancelled.", detail: "Transaction cancelled", life: 2000 });
         return;
     }
 
     const { data, error } = await supabaseClient
-        .from('parking_slot_booking')
+        .from("parking_slot_booking")
         .update({
             time_ended: new Date(),
             payment_amount: total.value,
             paid_at: new Date(),
-            payment_method: paymentMethod
         })
-        .eq('id', bookingData.value.id)
+        .eq("id", bookingData.value.id)
         .select();
 
     console.log(data, error);
 
     if (error) {
-        toast.add({ severity: 'error', summary: 'Error', detail: error.message, life: 2000 });
+        toast.add({ severity: "error", summary: "Error", detail: error.message, life: 2000 });
         return;
     }
 
 
     showModal.value = false;
-    emit('paid', data);
+    emit("paid", data);
 }
 
-const emit = defineEmits(['paid']);
+const emit = defineEmits(["paid"]);
 
 defineExpose({
     toggleModal
@@ -138,26 +136,22 @@ defineExpose({
             </h4>
         </template>
         <div v-if="bookingData && rating" class="text-center">
-            <div>Time Started: <b>{{ dayjs(bookingData.time_started).format('YYYY-MM-DD hh:mm A') }}</b></div>
+            <div>Time Started: <b>{{ dayjs(bookingData.time_started).format("YYYY-MM-DD hh:mm A") }}</b></div>
             <div>Hours Consumed: <b>{{ hours }}</b></div>
 
             <div class="mt-4">
                 <div v-if="hours > 2">
                     {{ computation }}
-                    <div><b>Total: {{ total.toLocaleString('en-PH', { style: 'currency', currency: 'PHP' }) }}</b></div>
+                    <div><b>Total: {{ total.toLocaleString("en-PH", { style: "currency", currency: "PHP" }) }}</b></div>
                 </div>
-                <div v-else><b>Total: {{ total.toLocaleString('en-PH', { style: 'currency', currency: 'PHP' }) }}</b>
+                <div v-else><b>Total: {{ total.toLocaleString("en-PH", { style: "currency", currency: "PHP" }) }}</b>
                 </div>
             </div>
         </div>
 
         <div class="mt-5 flex flex-column gap-2 text-center">
-            <Button :style="{ justifyContent: 'center'}" rounded @click="submitPayment('cod')"><span
-                class="pi pi-money-bill mr-2 mt-1"></span> Cash
-                On Hand
-            </Button>
-            <Button :style="{ justifyContent: 'center'}" rounded severity="info" @click="submitPayment('gcash')">
-                <img :src="GCashLogo" alt="" width="80" />
+            <Button :style="{ justifyContent: 'center'}" rounded @click="submitPayment()"><span
+                class="pi pi-money-bill mr-2 mt-1"></span> Proceed
             </Button>
         </div>
     </Dialog>

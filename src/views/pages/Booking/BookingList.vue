@@ -8,6 +8,7 @@ import { FilterMatchMode } from "primevue/api";
 import dayjs from "dayjs";
 import PayBookingModal from "@/components/BookingList/PayBookModal.vue";
 import GCashLogo from "@/assets/images/gcash logo.png";
+import { autoParkPaymentMethods } from "@/utils/payment";
 
 const PayBookingModalRef = ref(false);
 const loading = ref(false);
@@ -35,15 +36,35 @@ async function getBookingList() {
         return;
     }
 
-    bookLists.value = data.map((book) => ({
-        ...book,
-        status: book.time_ended ? "Done" : "Pending",
-    }));
+
+
+    bookLists.value = data.map((book) => {
+
+        let status = book.time_ended ? "Done" : "Pending";
+
+        if (!book.time_ended && ['gcash','maya'].includes(book.payment_method)) {
+            status = "Occupied";
+        }
+
+        if (book.payment_method === 'cod' && !book.time_ended) {
+            const timeStarted = dayjs(book.time_started);
+            const is15MinutePassed = dayjs().diff(timeStarted, 'minute') >= 15;
+
+            status = "Closed";
+        }
+
+        return {
+            ...book,
+            status
+        }
+    });
 }
 
 function badgeTypeStatus(status) {
     if (status === "Done") return "success";
-    if (status === "Pending") return "info";
+    if (status === "Pending") return "warning";
+    if (status === "Occupied") return "info";
+    if (status === "Closed") return "danger";
     return "info";
 }
 
@@ -137,17 +158,24 @@ onMounted(() => {
                             width="60"
                             style="border-radius: 8px"
                         />
-                        <div v-else>--</div>
+                        <img
+                            v-else-if="data.payment_method === 'maya'"
+                            src="https://www.rankthemag.ph/wp-content/uploads/2022/05/Maya2-700x283.jpg"
+                            alt=""
+                            class="bg-white p-1"
+                            width="60"
+                            style="border-radius: 8px"
+                        />
                     </template>
                 </Column>
                 <Column header="Action">
                     <template #body="{ data }">
                         <Button
-                            v-if="!(data.payment_amount > 0)"
+                            v-if="!(data.payment_amount > 0) && data.status !== 'Closed'"
                             icon="pi pi-money-bill"
                             label="Pay"
                             rounded
-                            severity="warning"
+                            severity="secondary"
                             @click="PayBookingModalRef.toggleModal(data)"
                         />
                     </template>
@@ -168,7 +196,7 @@ onMounted(() => {
                     <div>Time Started: {{ dayjs(book.time_started).format("YYYY-MM-DD hh:mm a") }}</div>
                     <div>Time Ended: {{ book.time_ended ? dayjs(book.time_ended).format("YYYY-MM-DD hh:mm a") : "--" }}</div>
                     <div>Amount: <b>{{ book.payment_amount.toLocaleString("en-PH", { style: "currency", currency: "PHP" }) }}</b></div>
-                    <div>
+                    <div >
                         Payment Method: <Badge v-if="book.payment_method === 'cod'">Cash On Hand</Badge>
                         <img
                             v-else-if="book.payment_method === 'gcash'"
@@ -178,14 +206,21 @@ onMounted(() => {
                             width="60"
                             style="border-radius: 8px"
                         />
-                        <div v-else>--</div>
+                        <img
+                            v-else-if="book.payment_method === 'maya'"
+                            src="https://www.rankthemag.ph/wp-content/uploads/2022/05/Maya2-700x283.jpg"
+                            alt=""
+                            class="bg-white p-1"
+                            width="60"
+                            style="border-radius: 8px"
+                        />
                     </div>
                     <Button
-                        v-if="!(book.payment_amount > 0)"
+                        v-if="!(book.payment_amount > 0) && book.status !== 'Closed'"
                         icon="pi pi-money-bill"
                         label="Pay"
                         rounded
-                        severity="warning"
+                        severity="secondary"
                         @click="PayBookingModalRef.toggleModal(book)"
                     />
                 </div>
