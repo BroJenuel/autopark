@@ -4,6 +4,7 @@ import { log, user } from "@/service/supabase/supabase";
 import { Loading } from "notiflix";
 import { useToast } from "primevue/usetoast";
 import dayjs from "dayjs";
+import { isMobileNumberValid } from "../../utils/formValidator";
 
 const oldData = ref(null)
 const toast = useToast();
@@ -54,6 +55,11 @@ function isFormValid() {
 
     if (form.value.role === "driver" && !form.value.driver_license_expiration) {
         toast.add({ severity: "error", summary: "Error", detail: "Driver license expiration is required" });
+        invalid++;
+    }
+
+    if (form.value.contact_number && isMobileNumberValid(form.value.contact_number)) {
+        toast.add({ severity: "error", summary: "Error", detail: "Contact number is invalid" });
         invalid++;
     }
 
