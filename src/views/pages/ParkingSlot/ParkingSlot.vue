@@ -6,7 +6,8 @@ import { useToast } from "primevue/usetoast";
 import { FilterMatchMode } from "primevue/api";
 import ShowOccupiedModal from "@/components/ParkingSlot/ShowOccupiedModal.vue";
 import { Confirm, Loading } from "notiflix";
-import { parkingSlot } from "@/service/supabase/supabase";
+import { parkingSlot, supabaseClient } from "@/service/supabase/supabase";
+import dayjs from "dayjs";
 
 const statusSelectUpdateSelected = ref(null);
 const selectedSlots = ref([]);
@@ -17,12 +18,22 @@ const StoreParkingSlotRef = ref();
 const ShowOccupiedModalRef = ref();
 const parkingSlots = ref([]);
 const filters = ref({
-    global: { value: null, matchMode: FilterMatchMode.CONTAINS }
+    global: { value: null, matchMode: FilterMatchMode.CONTAINS },
 });
+const parkingSlotBooking = ref([]);
 
 async function getParkingSlotLists() {
     loading.value = true;
     const { data, error } = await getParkingSlots();
+
+    const getParkingSlotBooking = await supabaseClient
+        .from("parking_slot_booking")
+        .select("*, parking_slot(*)")
+        .order("id", { ascending: false })
+        .is("paid_at", null)
+        .limit(1000);
+
+    parkingSlotBooking.value = getParkingSlotBooking.data;
 
     if (error) {
         toast.add({ severity: "error", summary: "Error", detail: error.message });
@@ -44,58 +55,91 @@ onMounted(async () => {
     await getParkingSlotLists();
 });
 
-const products = ref();
-
 function updateParkingSlotStatus() {
-    if (!statusSelectUpdateSelected.value)
-    {
+    if (!statusSelectUpdateSelected.value) {
         toast.add({ severity: "warn", summary: "Oops", detail: "Please select a status", life: 3000 });
         return;
     }
 
+    Confirm.show(
+        "Update Status",
+        "Are you sure you want to update status of selected parking slots?",
+        "Yes",
+        "No",
+        async () => {
+            const ids = selectedSlots.value.map((slot) => slot.id);
+            const status = statusSelectUpdateSelected.value;
 
-    Confirm.show("Update Status", "Are you sure you want to update status of selected parking slots?", "Yes", "No", async () => {
-        const ids = selectedSlots.value.map(slot => slot.id);
-        const status = statusSelectUpdateSelected.value;
+            Loading.standard("updating status...");
 
-        Loading.standard("updateing status...");
+            const { data, error } = await parkingSlot.updateParkingSlotStatus(ids, status);
 
-        const { data, error } = await parkingSlot.updateParkingSlotStatus(ids, status);
+            Loading.remove();
 
-        Loading.remove();
+            if (error) {
+                toast.add({ severity: "error", summary: "Error", detail: error.message });
+                return;
+            }
 
-        if (error) {
-            toast.add({ severity: "error", summary: "Error", detail: error.message });
-            return;
+            toast.add({ severity: "success", summary: "Success", detail: "Status updated successfully", life: 3000 });
+            await getParkingSlotLists();
+            selectedSlots.value = [];
+            statusSelectUpdateSelected.value = null;
+            showUpdateStatusOfSelectedParkingSlot.value = false;
+        },
+        () => {},
+        {
+            // waning background orange
+            okButtonBackground: "#f59e0b",
+            titleColor: "#f59e0b",
         }
+    );
+}
 
-        toast.add({ severity: "success", summary: "Success", detail: "Status updated successfully", life: 3000 });
-        await getParkingSlotLists();
-        selectedSlots.value = [];
-        statusSelectUpdateSelected.value = null;
-        showUpdateStatusOfSelectedParkingSlot.value = false;
+function isAboutToEnd(slot) {
+    const parkingSlotID = slot.id;
 
-    }, () => {}, {
-        // waning background orange
-        okButtonBackground: "#f59e0b",
-        titleColor: "#f59e0b"
-    });
+    if (slot.status !== "occupied") return false;
+
+    // get booking
+    const booking = parkingSlotBooking.value.find((book) => book.parking_slot_id === parkingSlotID);
+
+    if (!booking) return false;
+
+    const timeStarted = dayjs(booking.time_started);
+
+    // is timeStarted passed 3 hours
+    const isTimeStartedPassed3Hours = dayjs().diff(timeStarted, "hour") >= 3;
+    if (isTimeStartedPassed3Hours) return "passed3Hours";
+
+    // check if its about to end 5 minutes before 3 hours
+    const isAboutToEnd = dayjs().diff(timeStarted, "minute") >= 5 && dayjs().diff(timeStarted, "hour") < 3;
+    if (isAboutToEnd) return "aboutToEnd";
+
+    return false;
 }
 </script>
 <template>
     <ShowOccupiedModal ref="ShowOccupiedModalRef" />
     <StoreParkingSlot ref="StoreParkingSlotRef" @stored="getParkingSlotLists" />
-    <Dialog v-model:visible="showUpdateStatusOfSelectedParkingSlot" :style="{ width: '30rem' }" header="Update Status"
-            modal>
+    <Dialog
+        v-model:visible="showUpdateStatusOfSelectedParkingSlot"
+        :style="{ width: '30rem' }"
+        header="Update Status"
+        modal
+    >
         <div class="mb-4">
-            <Dropdown v-model="statusSelectUpdateSelected" :options="['available','occupied','closed','deleted']"
-                      class="w-full md:w-14rem"
-                      placeholder="Select a City" />
+            <Dropdown
+                v-model="statusSelectUpdateSelected"
+                :options="['available', 'occupied', 'closed', 'deleted']"
+                class="w-full md:w-14rem"
+                placeholder="Select a City"
+            />
         </div>
         <Button @click="updateParkingSlotStatus">Update</Button>
         <div class="mt-4">
             <div>Slots to be udpated:</div>
-            <div v-for="slot in selectedSlots" class="card" style="padding: 5px; margin-bottom: 5px;">
+            <div v-for="slot in selectedSlots" class="card" style="padding: 5px; margin-bottom: 5px">
                 <div>Area: {{ slot.area }}</div>
                 <div>Street: {{ slot.street }}</div>
             </div>
@@ -117,14 +161,18 @@ function updateParkingSlotStatus() {
             :sortOrder="-1"
             :value="parkingSlots"
             data-key="id"
-            sortField="created_at"
+            sortField="status"
             tableStyle="min-width: 50rem"
         >
             <template #header>
                 <div class="flex gap-2 justify-content-between flex-wrap">
                     <div>
-                        <Button size="small" :disabled="selectedSlots.length === 0"
-                                @click="showUpdateStatusOfSelectedParkingSlot = true">Change Status
+                        <Button
+                            size="small"
+                            :disabled="selectedSlots.length === 0"
+                            @click="showUpdateStatusOfSelectedParkingSlot = true"
+                        >
+                            Change Status
                         </Button>
                     </div>
                     <IconField iconPosition="left">
@@ -147,13 +195,24 @@ function updateParkingSlotStatus() {
             <Column field="longitude" header="Longitude" sortable></Column>
             <Column field="status" header="Status" sortable>
                 <template #body="slotProps">
-                    <Badge v-if="slotProps.data.status === 'occupied'"
-                           :severity="badgeTypeStatus(slotProps.data.status)" :value="slotProps.data.status"
-                           style="cursor: pointer;"
-                           @click="ShowOccupiedModalRef.toggleModal(slotProps.data.id)"
+                    <Badge
+                        v-if="slotProps.data.status === 'occupied'"
+                        :severity="badgeTypeStatus(slotProps.data.status)"
+                        :value="slotProps.data.status"
+                        style="cursor: pointer"
+                        @click="ShowOccupiedModalRef.toggleModal(slotProps.data.id)"
                     ></Badge>
-                    <Badge v-else :severity="badgeTypeStatus(slotProps.data.status)" :value="slotProps.data.status"
+                    <Badge
+                        v-else
+                        :severity="badgeTypeStatus(slotProps.data.status)"
+                        :value="slotProps.data.status"
                     ></Badge>
+                    <InlineMessage v-if="isAboutToEnd(slotProps.data) === 'passed3Hours'" class="mt-2" severity="error">
+                        This already passed 3 hours.
+                    </InlineMessage>
+                    <InlineMessage v-if="isAboutToEnd(slotProps.data) === 'aboutToEnd'" class="mt-2" severity="warn">
+                        This occupied slot is about to end.
+                    </InlineMessage>
                 </template>
             </Column>
             <Column header="Action">

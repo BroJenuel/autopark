@@ -36,27 +36,24 @@ async function getBookingList() {
         return;
     }
 
-
-
     bookLists.value = data.map((book) => {
-
         let status = book.time_ended ? "Done" : "Pending";
 
-        if (!book.time_ended && ['gcash','maya'].includes(book.payment_method)) {
+        if (!book.time_ended && ["gcash", "maya"].includes(book.payment_method)) {
             status = "Occupied";
         }
 
-        if (book.payment_method === 'cod' && !book.time_ended) {
+        if (book.payment_method === "cod" && !book.time_ended) {
             const timeStarted = dayjs(book.time_started);
-            const is15MinutePassed = dayjs().diff(timeStarted, 'minute') >= 15;
+            const is15MinutePassed = dayjs().diff(timeStarted, "minute") >= 15;
 
             status = "Closed";
         }
 
         return {
             ...book,
-            status
-        }
+            status,
+        };
     });
 }
 
@@ -75,8 +72,28 @@ onMounted(() => {
 
     window.addEventListener("resize", () => {
         screenWidthSize.value = window.innerWidth;
-    })
+    });
 });
+
+function isAboutToEnd(booking) {
+    console.log(booking);
+    if (!booking) return false;
+
+    if (booking.status === "Occupied") {
+        const timeStarted = dayjs(booking.time_started);
+
+        // is timeStarted passed 3 hours
+        const isTimeStartedPassed3Hours = dayjs().diff(timeStarted, "hour") >= 3;
+        if (isTimeStartedPassed3Hours) return "passed3Hours";
+
+        // check if its about to end 5 minutes before 3 hours
+        const isAboutToEnd = dayjs().diff(timeStarted, "minute") >= 120 && dayjs().diff(timeStarted, "hour") < 3;
+        if (isAboutToEnd) return "aboutToEnd";
+
+        return false;
+    }
+    return false;
+}
 </script>
 
 <template>
@@ -130,6 +147,9 @@ onMounted(() => {
                 <Column field="status" header="Status" sortable>
                     <template #body="{ data }">
                         <Badge :severity="badgeTypeStatus(data.status)" :value="data.status"></Badge>
+                        <InlineMessage v-if="isAboutToEnd(data) === 'aboutToEnd'" class="mt-2" severity="warn">
+                            This occupied slot is about to end.
+                        </InlineMessage>
                     </template>
                 </Column>
                 <Column field="time_started" header="Time Started" sortable>
@@ -194,9 +214,14 @@ onMounted(() => {
                     </div>
                     <div>Status: <Badge :severity="badgeTypeStatus(book.status)" :value="book.status"></Badge></div>
                     <div>Time Started: {{ dayjs(book.time_started).format("YYYY-MM-DD hh:mm a") }}</div>
-                    <div>Time Ended: {{ book.time_ended ? dayjs(book.time_ended).format("YYYY-MM-DD hh:mm a") : "--" }}</div>
-                    <div>Amount: <b>{{ book.payment_amount.toLocaleString("en-PH", { style: "currency", currency: "PHP" }) }}</b></div>
-                    <div >
+                    <div>
+                        Time Ended: {{ book.time_ended ? dayjs(book.time_ended).format("YYYY-MM-DD hh:mm a") : "--" }}
+                    </div>
+                    <div>
+                        Amount:
+                        <b>{{ book.payment_amount.toLocaleString("en-PH", { style: "currency", currency: "PHP" }) }}</b>
+                    </div>
+                    <div>
                         Payment Method: <Badge v-if="book.payment_method === 'cod'">Cash On Hand</Badge>
                         <img
                             v-else-if="book.payment_method === 'gcash'"
