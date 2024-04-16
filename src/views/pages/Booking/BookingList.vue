@@ -76,7 +76,6 @@ onMounted(() => {
 });
 
 function isAboutToEnd(booking) {
-    console.log(booking);
     if (!booking) return false;
 
     if (booking.status === "Occupied") {

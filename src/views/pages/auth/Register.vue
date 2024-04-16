@@ -9,6 +9,7 @@ import LightImageLogo from "@/assets/images/auto-park-for-light.png";
 import { useToast } from "primevue/usetoast";
 import { Loading } from "notiflix";
 import dayjs from "dayjs";
+import { isMobileNumberValid } from "../../../utils/formValidator";
 
 const toast = useToast();
 const router = useRouter();
@@ -58,6 +59,11 @@ function isFormValid() {
 
     if (form.value.role === "driver" && !form.value.driver_license_expiration) {
         toast.add({ severity: "error", summary: "Error", detail: "Driver license expiration is required" });
+        invalid++;
+    }
+
+    if (form.value.contact_number && isMobileNumberValid(form.value.contact_number)) {
+        toast.add({ severity: "error", summary: "Error", detail: "Contact number is invalid" });
         invalid++;
     }
 
