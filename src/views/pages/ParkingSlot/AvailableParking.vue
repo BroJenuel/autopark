@@ -61,11 +61,12 @@ function setMap() {
             // check if time is greater than 7am and less than 7pm
             if (dayjs().hour() < 7 || dayjs().hour() > 19) {
                 Report.info(
-                    "Parking is not available at this time",
-                    "Sorry, parking is not available at this time. Its available from 7am to 7pm.",
+                    "Currently, parking is not available.",
+                    "Currently, parking is not available. <b>We allow parking between 7am and 7pm. </b>",
                     "Ok",
                     {
                         titleMaxLength: 999,
+                        plainText: false,
                     }
                 );
                 return;

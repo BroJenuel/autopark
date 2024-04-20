@@ -232,7 +232,7 @@ async function cancelBooking(booking) {
                 <Column header="Action">
                     <template #body="{ data }">
                         <Button
-                            v-if="!(data.payment_amount > 0) && data.status !== 'Closed'"
+                            v-if="!(data.payment_amount > 0) && data.status !== 'Closed' && !data.time_ended"
                             icon="pi pi-money-bill"
                             label="Pay"
                             rounded
@@ -291,7 +291,7 @@ async function cancelBooking(booking) {
                         />
                     </div>
                     <Button
-                        v-if="!(book.payment_amount > 0) && book.status !== 'Closed'"
+                        v-if="!(book.payment_amount > 0) && book.status !== 'Closed' && !data.time_ended"
                         icon="pi pi-money-bill"
                         label="Pay"
                         rounded
