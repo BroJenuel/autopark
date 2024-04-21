@@ -40,30 +40,39 @@ const logoUrl = computed(() => {
     return layoutConfig.darkTheme.value ? DarkImageLogo : LightImageLogo;
 });
 
+function displayValidationError(message) {
+    toast.add({ severity: "error", summary: "Error", detail: message, life: 3000 });
+}
+
 function isFormValid() {
     let invalid = 0;
     if (!form.value.first_name) {
-        toast.add({ severity: "error", summary: "Error", detail: "First name is required" });
+        displayValidationError("First name is required");
         invalid++;
     }
 
     if (!form.value.email) {
-        toast.add({ severity: "error", summary: "Error", detail: "Email is required" });
+        displayValidationError("Email is required");
         invalid++;
     }
 
     if (!form.value.driver_license || form.value.driver_license.length !== 11) {
-        toast.add({ severity: "error", summary: "Error", detail: "Driver license is required" });
+        displayValidationError("Driver license is required");
+        invalid++;
+    }
+
+    if (!form.value.contact_number) {
+        displayValidationError("Contact number is required");
+        invalid++;
+    }
+
+    if (form.value.contact_number && !isMobileNumberValid(form.value.contact_number)) {
+        displayValidationError("Contact number should be a valid mobile number (9 digits)");
         invalid++;
     }
 
     if (form.value.role === "driver" && !form.value.driver_license_expiration) {
-        toast.add({ severity: "error", summary: "Error", detail: "Driver license expiration is required" });
-        invalid++;
-    }
-
-    if (form.value.contact_number && isMobileNumberValid(form.value.contact_number)) {
-        toast.add({ severity: "error", summary: "Error", detail: "Contact number is invalid" });
+        displayValidationError("Driver license expiration is required");
         invalid++;
     }
 
@@ -93,7 +102,7 @@ async function signUp() {
             data: theUserData,
             role: "driver",
         },
-        { onConflict: "user_id" }
+        { onConflict: "user_id" },
     );
 
     Loading.remove();
@@ -158,7 +167,7 @@ const licenseExpirationMinDate = ref(dayjs().add("1", "day").toDate());
                             <InputText v-model="form.first_name" placeholder="ex. Jhon" required />
                         </div>
                         <div class="flex flex-column gap-2 mb-3">
-                            <label>Middle Name</label>
+                            <label>Middle Name (OPTIONAL)</label>
                             <InputText v-model="form.middle_name" placeholder="ex. Doe" />
                         </div>
                         <div class="flex flex-column gap-2 mb-3">
