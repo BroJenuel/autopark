@@ -95,7 +95,7 @@ const products = ref();
             <Column field="image" header="Image" sortable>
                 <template #body="slotProps">
                     <Image
-                        v-if="slotProps.data.image"
+                        v-if="slotProps.data.image && slotProps.data.image.data?.fullPath"
                         :src="`https://hqymkslkcmsenuymkgej.supabase.co/storage/v1/object/public/${slotProps.data.image.data.fullPath}`"
                         alt="Image"
                         preview

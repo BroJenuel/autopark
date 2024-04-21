@@ -57,7 +57,8 @@ async function submit() {
         return;
     }
 
-    const uploadImage = form.value.image
+    const isNewImage = form.value.image && form.value.image instanceof File;
+    const uploadImage = isNewImage
         ? await supabaseClient.storage
               .from("public storage")
               .upload("images/events/" + Date.now() + "-" + getFileExtension(form.value.image.name), form.value.image)
@@ -66,7 +67,7 @@ async function submit() {
     const dataParams = {
         title: form.value.title,
         description: form.value.description,
-        image: uploadImage,
+        image: isNewImage ? uploadImage : form.value.image,
         type: form.value.type,
         status: form.value.status,
     };
@@ -103,7 +104,7 @@ defineExpose({
     <Dialog
         v-model:visible="showModal"
         :breakpoints="{ '1199px': '75vw', '575px': '90vw' }"
-        :header="form.id ? 'Update Event/Announcement' : 'Add Event/Announcement'"
+        :header="form.id ? 'Edit Event/Announcement' : 'Add Event/Announcement'"
         :style="{ width: '50rem' }"
         modal
     >
@@ -118,9 +119,9 @@ defineExpose({
             </div>
             <div class="flex flex-column gap-2 mb-3">
                 <label>Select Image</label>
-                <FileUpload accept="image/*" mode="basic" @select="customBase64Uploader" />
+                <FileUpload accept="image/*" mode="basic" @select="customBase64Uploader($event)" />
                 <img
-                    v-if="form.image && form.image.data"
+                    v-if="form.image && form.image.data && form.image?.data?.fullPath"
                     :src="`https://hqymkslkcmsenuymkgej.supabase.co/storage/v1/object/public/${form.image.data.fullPath}`"
                     alt=""
                     width="150px"
