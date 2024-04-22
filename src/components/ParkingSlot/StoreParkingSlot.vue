@@ -26,7 +26,8 @@ const form = ref({
 const statusOptions = [
     { name: "Available", code: "available" },
     { name: "Occupied", code: "occupied" },
-    { name: "Not Available", code: "not_available" }
+    { name: "Not Available", code: "not_available" },
+    { name: "Reserved", code: "reserved" }
 ];
 
 const streetOptionLoading = ref(false);

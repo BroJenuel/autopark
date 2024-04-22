@@ -1,13 +1,14 @@
 <script setup>
-import { onMounted, ref } from "vue";
-import { getParkingSlots } from "@/service/supabase/table/parking_slot";
-import StoreParkingSlot from "@/components/ParkingSlot/StoreParkingSlot.vue";
-import { useToast } from "primevue/usetoast";
-import { FilterMatchMode } from "primevue/api";
 import ShowOccupiedModal from "@/components/ParkingSlot/ShowOccupiedModal.vue";
-import { Confirm, Loading } from "notiflix";
+import ShowReservedModal from "@/components/ParkingSlot/ShowReservedModal.vue";
+import StoreParkingSlot from "@/components/ParkingSlot/StoreParkingSlot.vue";
 import { parkingSlot, supabaseClient } from "@/service/supabase/supabase";
+import { getParkingSlots } from "@/service/supabase/table/parking_slot";
 import dayjs from "dayjs";
+import { Confirm, Loading } from "notiflix";
+import { FilterMatchMode } from "primevue/api";
+import { useToast } from "primevue/usetoast";
+import { onMounted, ref } from "vue";
 
 const statusSelectUpdateSelected = ref(null);
 const selectedSlots = ref([]);
@@ -16,6 +17,7 @@ const loading = ref(false);
 const toast = useToast();
 const StoreParkingSlotRef = ref();
 const ShowOccupiedModalRef = ref();
+const ShowReservedModalRef = ref();
 const parkingSlots = ref([]);
 const filters = ref({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS },
@@ -32,7 +34,7 @@ async function getParkingSlotLists() {
         .order("id", { ascending: false })
         .is("paid_at", null)
         .limit(1000);
-
+    
     parkingSlotBooking.value = getParkingSlotBooking.data;
 
     if (error) {
@@ -46,7 +48,10 @@ async function getParkingSlotLists() {
 
 function badgeTypeStatus(status) {
     if (status === "available") return "success";
+
     if (status === "occupied") return "warning";
+    if (status === "reserved") return "primary";
+
     if (status === "not_available") return "danger";
     return "info";
 }
@@ -92,7 +97,7 @@ function updateParkingSlotStatus() {
             // waning background orange
             okButtonBackground: "#f59e0b",
             titleColor: "#f59e0b",
-        }
+        },
     );
 }
 
@@ -121,6 +126,7 @@ function isAboutToEnd(slot) {
 </script>
 <template>
     <ShowOccupiedModal ref="ShowOccupiedModalRef" />
+    <ShowReservedModal ref="ShowReservedModalRef" @reloadParkingSlots="getParkingSlotLists" />
     <StoreParkingSlot ref="StoreParkingSlotRef" @stored="getParkingSlotLists" />
     <Dialog
         v-model:visible="showUpdateStatusOfSelectedParkingSlot"
@@ -203,6 +209,13 @@ function isAboutToEnd(slot) {
                         @click="ShowOccupiedModalRef.toggleModal(slotProps.data.id)"
                     ></Badge>
                     <Badge
+                        v-else-if="slotProps.data.status === 'reserved'"
+                        :severity="badgeTypeStatus(slotProps.data.status)"
+                        :value="slotProps.data.status"
+                        style="cursor: pointer"
+                        @click="ShowReservedModalRef.toggleModal(slotProps.data.id)"
+                    ></Badge>
+                    <Badge
                         v-else
                         :severity="badgeTypeStatus(slotProps.data.status)"
                         :value="slotProps.data.status"
@@ -217,6 +230,14 @@ function isAboutToEnd(slot) {
             </Column>
             <Column header="Action">
                 <template #body="slotProps">
+                    <Button
+                        v-if="slotProps.data.status === 'reserved'"
+                        icon="pi pi-money-bill"
+                        label="Mark as Paid"
+                        rounded
+                        severity="secondary"
+                        @click="ShowReservedModalRef.toggleModal(slotProps.data.id)"
+                    />
                     <Button
                         class="p-button-rounded p-button-success mr-2"
                         icon="pi pi-pencil"
