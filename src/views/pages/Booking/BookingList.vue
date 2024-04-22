@@ -107,19 +107,19 @@ async function cancelBooking(booking) {
             Loading.standard();
 
             const bookingList = await supabaseClient
-                .from('parking_slot')
+                .from("parking_slot")
                 .update({
-                    status: 'available',
+                    status: "available",
                 })
-                .eq('id', parkingSlotId)
+                .eq("id", parkingSlotId)
                 .select();
 
             const bookingListSlot = await supabaseClient
-                .from('parking_slot_booking')
+                .from("parking_slot_booking")
                 .update({
                     time_ended: new Date(),
                 })
-                .eq('parking_slot_id', parkingSlotId)
+                .eq("parking_slot_id", parkingSlotId)
                 .select();
 
             await getBookingList();
@@ -130,10 +130,8 @@ async function cancelBooking(booking) {
         {
             okButtonBackground: "rgb(255 0 0 / 50%)",
             titleColor: "red",
-        }
-    )
-
-
+        },
+    );
 }
 </script>
 
@@ -232,7 +230,12 @@ async function cancelBooking(booking) {
                 <Column header="Action">
                     <template #body="{ data }">
                         <Button
-                            v-if="!(data.payment_amount > 0) && data.status !== 'Closed' && !data.time_ended"
+                            v-if="
+                                !(data.payment_amount > 0) &&
+                                data.status !== 'Closed' &&
+                                !data.time_ended &&
+                                data.payment_method === 'cod'
+                            "
                             icon="pi pi-money-bill"
                             label="Pay"
                             rounded
