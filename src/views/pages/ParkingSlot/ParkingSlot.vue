@@ -24,6 +24,28 @@ const filters = ref({
 });
 const parkingSlotBooking = ref([]);
 
+/**
+ * Calculate the time consumed based on the time started.
+ * @param {string} timeStarted - The time the slot was started.
+ * @returns {number} - The time consumed in minutes.
+ */
+function getTimeConsumed(timeStarted) {
+    const timeStartedDate = dayjs(timeStarted);
+    const timeNow = dayjs();
+    const diff = timeNow.diff(timeStartedDate, "minute");
+
+    return diff;
+}
+
+/**
+ * Format the time consumed in minutes into a string representation.
+ * @param {number} timeConsumed_min - The time consumed in minutes.
+ * @returns {string} - The formatted time consumed.
+ */
+function formatTimeConsumed(timeConsumed_min) {
+    return timeConsumed_min ? dayjs(timeConsumed_min * 60000).format("H[h] m[m]") : "--";
+}
+
 async function getParkingSlotLists() {
     loading.value = true;
     const { data, error } = await getParkingSlots();
@@ -34,7 +56,7 @@ async function getParkingSlotLists() {
         .order("id", { ascending: false })
         .is("paid_at", null)
         .limit(1000);
-    
+
     parkingSlotBooking.value = getParkingSlotBooking.data;
 
     if (error) {
@@ -42,7 +64,18 @@ async function getParkingSlotLists() {
         return;
     }
 
-    parkingSlots.value = data;
+    const formattedParkingSlot = data.map((item) => {
+        return {
+            ...item,
+            timeConsumed_min:
+                item.status === "occupied"
+                    ? getTimeConsumed(
+                          parkingSlotBooking.value.find((booking) => booking.parking_slot_id === item.id)?.time_started,
+                      )
+                    : null,
+        };
+    });
+    parkingSlots.value = formattedParkingSlot;
     loading.value = false;
 }
 
@@ -199,6 +232,11 @@ function isAboutToEnd(slot) {
             <Column field="street" header="Street" sortable></Column>
             <Column field="latitude" header="Latitude" sortable></Column>
             <Column field="longitude" header="Longitude" sortable></Column>
+            <Column field="timeConsumed_min" header="Time Consumed" sortable>
+                <template #body="slotProps">
+                    {{ formatTimeConsumed(slotProps.data.timeConsumed_min) }}
+                </template>
+            </Column>
             <Column field="status" header="Status" sortable>
                 <template #body="slotProps">
                     <Badge
