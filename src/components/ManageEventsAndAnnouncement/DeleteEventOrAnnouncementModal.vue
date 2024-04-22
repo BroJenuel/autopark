@@ -1,11 +1,27 @@
 <script setup>
+import { supabaseClient } from "@/service/supabase/supabase";
 import { useConfirm } from "primevue/useconfirm";
 import { useToast } from "primevue/usetoast";
+import { Loading } from "notiflix";
 
+const emits = defineEmits(["refetchTable"]);
 const confirm = useConfirm();
 const toast = useToast();
 
-const showConfirmationDialog = () => {
+const handleConfirmDelete = async (id) => {
+    Loading.standard();
+    const { error } = await supabaseClient.from("events_announcements").delete().eq("id", id);
+    Loading.remove();
+
+    if (error) {
+        return toast.add({ severity: "danger", summary: "Error", detail: "Unable to delete record.", life: 3000 });
+    }
+
+    emits("refetchTable");
+    toast.add({ severity: "success", summary: "Confirmed", detail: "Record deleted", life: 3000 });
+};
+
+const showConfirmationDialog = (id) => {
     confirm.require({
         group: "deleteEventOrAnnouncementModal",
         header: "Confirmation",
@@ -17,9 +33,7 @@ const showConfirmationDialog = () => {
         acceptClass: "p-button-sm",
         rejectLabel: "Cancel",
         acceptLabel: "Delete",
-        accept: () => {
-            toast.add({ severity: "success", summary: "Confirmed", detail: "Record deleted", life: 3000 });
-        },
+        accept: () => handleConfirmDelete(id),
     });
 };
 

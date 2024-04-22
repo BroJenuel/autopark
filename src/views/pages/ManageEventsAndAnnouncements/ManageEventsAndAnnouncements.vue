@@ -41,7 +41,7 @@ onMounted(async () => {
 const products = ref();
 </script>
 <template>
-    <DeleteEventOrAnnouncementModal ref="DeleteEventOrAnnouncementModalRef" />
+    <DeleteEventOrAnnouncementModal ref="DeleteEventOrAnnouncementModalRef" @refetchTable="getEventsAndAnnouncements" />
     <ManageEventsAndAnnouncementsStoreModal
         ref="ManageEventsAndAnnouncementsStoreModalRef"
         @stored="getEventsAndAnnouncements"
@@ -122,7 +122,7 @@ const products = ref();
                     <Button
                         class="p-button-rounded p-button-danger mr-2"
                         icon="pi pi-trash"
-                        @click="DeleteEventOrAnnouncementModalRef.showConfirmationDialog()"
+                        @click="DeleteEventOrAnnouncementModalRef.showConfirmationDialog(slotProps.data.id)"
                     />
                 </template>
             </Column>
