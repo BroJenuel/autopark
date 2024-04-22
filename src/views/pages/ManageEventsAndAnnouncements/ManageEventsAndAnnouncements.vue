@@ -122,7 +122,7 @@ const products = ref();
                     <Button
                         class="p-button-rounded p-button-danger mr-2"
                         icon="pi pi-trash"
-                        @click="DeleteEventOrAnnouncementModalRef.showConfirmationDialog(slotProps.data.id)"
+                        @click="DeleteEventOrAnnouncementModalRef.showConfirmationDialog(slotProps.data)"
                     />
                 </template>
             </Column>

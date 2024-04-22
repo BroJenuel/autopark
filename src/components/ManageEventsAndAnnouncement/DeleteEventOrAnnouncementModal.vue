@@ -21,11 +21,16 @@ const handleConfirmDelete = async (id) => {
     toast.add({ severity: "success", summary: "Confirmed", detail: "Record deleted", life: 3000 });
 };
 
-const showConfirmationDialog = (id) => {
+const showConfirmationDialog = (data) => {
+    const message =
+        data.type === "announcement"
+            ? "Are you sure you want to delete this announcement?"
+            : "Are you sure you want to delete this event?";
+
     confirm.require({
         group: "deleteEventOrAnnouncementModal",
         header: "Confirmation",
-        message: "Are you sure you want to delete this event or announcement?",
+        message,
         icon: "pi pi-exclamation-circle",
         acceptIcon: "pi pi-check",
         rejectIcon: "pi pi-times",
@@ -33,7 +38,7 @@ const showConfirmationDialog = (id) => {
         acceptClass: "p-button-sm",
         rejectLabel: "Cancel",
         acceptLabel: "Delete",
-        accept: () => handleConfirmDelete(id),
+        accept: () => handleConfirmDelete(data.id),
     });
 };
 
