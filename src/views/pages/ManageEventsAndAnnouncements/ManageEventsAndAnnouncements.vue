@@ -1,13 +1,15 @@
 <script setup>
-import { onMounted, ref } from "vue";
+import DeleteEventOrAnnouncementModal from "@/components/ManageEventsAndAnnouncement/DeleteEventOrAnnouncementModal.vue";
 import ManageEventsAndAnnouncementsStoreModal from "@/components/ManageEventsAndAnnouncement/ManageEventsAndAnnouncementsStoreModal.vue";
-import { useToast } from "primevue/usetoast";
-import { FilterMatchMode } from "primevue/api";
 import { supabaseClient } from "@/service/supabase/supabase";
+import { FilterMatchMode } from "primevue/api";
+import { useToast } from "primevue/usetoast";
+import { onMounted, ref } from "vue";
 
 const loading = ref(false);
 const toast = useToast();
 const ManageEventsAndAnnouncementsStoreModalRef = ref();
+const DeleteEventOrAnnouncementModalRef = ref();
 const eventsAnnouncements = ref([]);
 const filters = ref({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS },
@@ -39,6 +41,7 @@ onMounted(async () => {
 const products = ref();
 </script>
 <template>
+    <DeleteEventOrAnnouncementModal ref="DeleteEventOrAnnouncementModalRef" />
     <ManageEventsAndAnnouncementsStoreModal
         ref="ManageEventsAndAnnouncementsStoreModalRef"
         @stored="getEventsAndAnnouncements"
@@ -115,6 +118,11 @@ const products = ref();
                         class="p-button-rounded p-button-success mr-2"
                         icon="pi pi-pencil"
                         @click="ManageEventsAndAnnouncementsStoreModalRef.toggleModal(slotProps.data)"
+                    />
+                    <Button
+                        class="p-button-rounded p-button-danger mr-2"
+                        icon="pi pi-trash"
+                        @click="DeleteEventOrAnnouncementModalRef.showConfirmationDialog()"
                     />
                 </template>
             </Column>
