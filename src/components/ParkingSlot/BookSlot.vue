@@ -24,7 +24,7 @@ async function bookSlot() {
 
     Loading.hourglass("booking slot...");
 
-    const { data, error } = await supabaseClient
+    const { error } = await supabaseClient
         .from("parking_slot_booking")
         .insert([
             {

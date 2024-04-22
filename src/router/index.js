@@ -191,9 +191,9 @@ const router = createRouter({
                 {
                     path: 'my-bookings',
                     name: 'My Bookings',
-                    component: () => import('@/views/pages/Booking/BookingList.vue'),
+                    component: () => import('@/views/pages/Booking/MyBookingList.vue'),
                     beforeEnter: anyoneCanAccess
-                }
+                },
             ]
         },
         {
