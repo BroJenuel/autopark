@@ -29,7 +29,7 @@ async function SignIn() {
         return;
     }
 
-    const { error } = await signInUser(email.value, password.value);
+    const { data, error } = await signInUser(email.value, password.value);
 
     if (error) {
         console.log("error");
@@ -38,7 +38,15 @@ async function SignIn() {
     }
 
     toast.add({ severity: "success", summary: "Success", detail: "Login successful", life: 3000 });
-    await router.push("/");
+    await redirectToHomePage(data.user?.app_metadata?.role)
+}
+
+async function redirectToHomePage(role) {
+    if (role === 'driver') {
+        return await router.push('/available-parking');
+    }
+
+    await router.push('/')
 }
 
 onMounted(async () => {
