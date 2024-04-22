@@ -14,34 +14,35 @@ const form = ref({
     description: null,
     image: null,
     type: null,
-    status: "active"
+    status: "active",
 });
 
 const eventsAnnouncementTypeOptions = [
     { name: "Announcement", code: "announcement" },
-    { name: "Event", code: "event" }
+    { name: "Event", code: "event" },
 ];
 
 const eventsAnnouncementStatusOptions = [
     { name: "Active", code: "active" },
-    { name: "Inactive", code: "inactive" }
+    { name: "Inactive", code: "inactive" },
 ];
 
-function toggleModal(data = {
-    id: null,
-    title: null,
-    description: null,
-    image: null,
-    type: null,
-    status: "active"
-}) {
+function toggleModal(
+    data = {
+        id: null,
+        title: null,
+        description: null,
+        image: null,
+        type: null,
+        status: "active",
+    },
+) {
     if (data != null) {
         form.value = data;
         oldData.value = data;
     }
     showModal.value = !showModal.value;
 }
-
 
 async function submit() {
     const isUpdate = form.value.id != null;
@@ -51,44 +52,36 @@ async function submit() {
             severity: "error",
             summary: "Error",
             detail: "Please select an event type or status",
-            life: 3000
+            life: 3000,
         });
         return;
     }
 
-
-    // upload image first
-    const uploadImage = form.value.image
-        ? await supabaseClient
-            .storage
-            .from("public storage")
-            .upload("images/events/" + (Date.now()) + "-" + getFileExtension(form.value.image.name), form.value.image)
+    const isNewImage = form.value.image && form.value.image instanceof File;
+    const uploadImage = isNewImage
+        ? await supabaseClient.storage
+              .from("public storage")
+              .upload("images/events/" + Date.now() + "-" + getFileExtension(form.value.image.name), form.value.image)
         : null;
 
     const dataParams = {
         title: form.value.title,
         description: form.value.description,
-        image: uploadImage,
+        image: isNewImage ? uploadImage : form.value.image,
         type: form.value.type,
-        status: form.value.status
+        status: form.value.status,
     };
 
     // then add the data
-    const addEventAnnouncement = isUpdate ? await supabaseClient
-            .from("events_announcements")
-            .update(dataParams)
-            .eq("id", form.value.id)
-            .select()
-        : await supabaseClient
-            .from("events_announcements")
-            .insert(dataParams)
-            .select();
+    const addEventAnnouncement = isUpdate
+        ? await supabaseClient.from("events_announcements").update(dataParams).eq("id", form.value.id).select()
+        : await supabaseClient.from("events_announcements").insert(dataParams).select();
 
     if (addEventAnnouncement.error) {
         toast.add({
             severity: "error",
             summary: "Error",
-            detail: addEventAnnouncement.error
+            detail: addEventAnnouncement.error,
         });
     }
 
@@ -103,7 +96,7 @@ const customBase64Uploader = async (event) => {
 };
 
 defineExpose({
-    toggleModal
+    toggleModal,
 });
 </script>
 
@@ -111,7 +104,7 @@ defineExpose({
     <Dialog
         v-model:visible="showModal"
         :breakpoints="{ '1199px': '75vw', '575px': '90vw' }"
-        :header="form.id ? 'Update Parking Slot' : 'Add New Parking Slot'"
+        :header="form.id ? 'Edit Event/Announcement' : 'Add Event/Announcement'"
         :style="{ width: '50rem' }"
         modal
     >
@@ -126,10 +119,13 @@ defineExpose({
             </div>
             <div class="flex flex-column gap-2 mb-3">
                 <label>Select Image</label>
-                <FileUpload accept="image/*" mode="basic" @select="customBase64Uploader" />
-                <img v-if="form.image && form.image.data"
-                     :src="`https://hqymkslkcmsenuymkgej.supabase.co/storage/v1/object/public/${form.image.data.fullPath}`"
-                     alt="" width="150px" />
+                <FileUpload accept="image/*" mode="basic" @select="customBase64Uploader($event)" />
+                <img
+                    v-if="form.image && form.image.data && form.image?.data?.fullPath"
+                    :src="`https://hqymkslkcmsenuymkgej.supabase.co/storage/v1/object/public/${form.image.data.fullPath}`"
+                    alt=""
+                    width="150px"
+                />
             </div>
             <div class="flex flex-column gap-2 mb-3">
                 <label>Type</label>
@@ -155,7 +151,7 @@ defineExpose({
                     required
                 />
             </div>
-            <Button :label="form.id ? 'Update Parking Slot' : 'Create Parking Slot'" type="submit" />
+            <Button :label="form.id ? 'Update Event/Announcement' : 'Create Event/Announcement'" type="submit" />
         </form>
     </Dialog>
 </template>
