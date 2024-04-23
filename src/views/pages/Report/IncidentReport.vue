@@ -1,34 +1,39 @@
 <script setup>
-import { supabaseClient } from "@/service/supabase/supabase";
-import { useUserStore } from "@/store/userStore";
-import { onMounted, ref } from "vue";
-import { useRouter } from "vue-router";
-import { useToast } from "primevue/usetoast";
-import { FilterMatchMode } from "primevue/api";
-import dayjs from "dayjs";
 import PayBookingModal from "@/components/BookingList/PayBookModal.vue";
-import GCashLogo from "@/assets/images/gcash logo.png";
+import { fetchAllIncidentReportsWithParkingSlot } from "@/service/supabase/table/incident_report";
+import dayjs from "dayjs";
+import { Loading } from "notiflix";
+import { FilterMatchMode } from "primevue/api";
+import { useToast } from "primevue/usetoast";
+import { onMounted, ref } from "vue";
 
 const PayBookingModalRef = ref(false);
 const loading = ref(false);
 const toast = useToast();
-const router = useRouter();
-const userStore = useUserStore();
-const bookLists = ref([]);
+const incidentReports = ref([]);
 const filters = ref({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS },
 });
 
-async function getBookingList() {}
-
-function badgeTypeStatus(status) {
-    if (status === "Done") return "success";
-    if (status === "Pending") return "info";
-    return "info";
+async function getIncidentReports() {
+    try {
+        Loading.standard();
+        const data = await fetchAllIncidentReportsWithParkingSlot();
+        incidentReports.value = data;
+    } catch (e) {
+        toast.add({
+            severity: "error",
+            summary: "Error",
+            detail: e.message ?? "Unable to get incident reports",
+            life: 3000,
+        });
+    } finally {
+        Loading.remove();
+    }
 }
 
 onMounted(() => {
-    getBookingList();
+    getIncidentReports();
 });
 </script>
 
@@ -47,7 +52,7 @@ onMounted(() => {
                 :globalFilterFields="['parking_slot.area', 'parking_slot.street', 'id', 'payment_method', 'status']"
                 :loading="loading"
                 :sortOrder="-1"
-                :value="bookLists"
+                :value="incidentReports"
                 sortField="created_at"
                 tableStyle="min-width: 70rem"
             >
@@ -61,14 +66,51 @@ onMounted(() => {
                         </IconField>
                     </div>
                 </template>
-                <Column field="created_at" header="Date Created" sortable>
+                <Column field="id" header="#"></Column>
+                <Column field="parking_slot" header="Parking Slot">
                     <template #body="slotProps">
-                        {{ new Date(slotProps.data.created_at).toLocaleString() }}
+                        <div class="flex flex-column gap-4">
+                            <div>
+                                {{ slotProps.data.parking_slot_booking.parking_slot.area }}
+                                {{ slotProps.data.parking_slot_booking.parking_slot.street }}
+                            </div>
+                            <div>
+                                <div>Driver Details:</div>
+                                <div>
+                                    <span>
+                                        {{ slotProps.data.parking_slot_booking.user_profile.data.first_name }}
+                                        {{ ` ` }}
+                                        {{ slotProps.data.parking_slot_booking.user_profile.data.last_name }}
+                                    </span>
+                                </div>
+                                <div>
+                                    {{ slotProps.data.parking_slot_booking.user_profile.data.driver_license }}
+                                </div>
+                                <div>
+                                    {{ slotProps.data.parking_slot_booking.user_profile.data.contact_number }}
+                                </div>
+                            </div>
+                        </div>
                     </template>
                 </Column>
-                <Column field="id" header="#"></Column>
-                <Column field="parking_slot" header="Parking Slot" sortable></Column>
-                <Column field="incident" header="Incident" sortable></Column>
+                <Column field="description" header="Incident" sortable></Column>
+                <Column field="image" header="Image">
+                    <template #body="slotProps">
+                        <Image
+                            v-if="!!slotProps.data?.image?.fullPath"
+                            :src="`https://hqymkslkcmsenuymkgej.supabase.co/storage/v1/object/public/${slotProps.data.image.fullPath}`"
+                            alt="Image"
+                            preview
+                            width="150"
+                        />
+                        <span v-else>No Image</span>
+                    </template>
+                </Column>
+                <Column field="created_at" header="Date Created" sortable>
+                    <template #body="slotProps">
+                        {{ dayjs(slotProps.data.created_at).format("D-MMM-YY HH:mm") }}
+                    </template>
+                </Column>
             </DataTable>
         </div>
     </div>

@@ -9,6 +9,7 @@ import { Confirm, Loading } from "notiflix";
 import { FilterMatchMode } from "primevue/api";
 import { useToast } from "primevue/usetoast";
 import { onMounted, ref } from "vue";
+import CreateIncidentReportModal from "../../../components/ParkingSlot/CreateIncidentReportModal.vue";
 
 const statusSelectUpdateSelected = ref(null);
 const selectedSlots = ref([]);
@@ -18,6 +19,7 @@ const toast = useToast();
 const StoreParkingSlotRef = ref();
 const ShowOccupiedModalRef = ref();
 const ShowReservedModalRef = ref();
+const CreateIncidentReportModalRef = ref();
 const parkingSlots = ref([]);
 const filters = ref({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS },
@@ -161,6 +163,7 @@ function isAboutToEnd(slot) {
     <ShowOccupiedModal ref="ShowOccupiedModalRef" />
     <ShowReservedModal ref="ShowReservedModalRef" @reloadParkingSlots="getParkingSlotLists" />
     <StoreParkingSlot ref="StoreParkingSlotRef" @stored="getParkingSlotLists" />
+    <CreateIncidentReportModal ref="CreateIncidentReportModalRef" />
     <Dialog
         v-model:visible="showUpdateStatusOfSelectedParkingSlot"
         :style="{ width: '30rem' }"
@@ -268,19 +271,31 @@ function isAboutToEnd(slot) {
             </Column>
             <Column header="Action">
                 <template #body="slotProps">
-                    <Button
-                        v-if="slotProps.data.status === 'reserved'"
-                        icon="pi pi-money-bill"
-                        label="Mark as Paid"
-                        rounded
-                        severity="secondary"
-                        @click="ShowReservedModalRef.toggleModal(slotProps.data.id)"
-                    />
-                    <Button
-                        class="p-button-rounded p-button-success mr-2"
-                        icon="pi pi-pencil"
-                        @click="StoreParkingSlotRef.toggleModal(slotProps.data)"
-                    />
+                    <div className="flex gap-2">
+                        <Button
+                            class="p-button-success"
+                            icon="pi pi-pencil"
+                            @click="StoreParkingSlotRef.toggleModal(slotProps.data)"
+                            v-tooltip="'Edit'"
+                            rounded
+                        />
+                        <Button
+                            v-if="slotProps.data.status === 'reserved'"
+                            class="p-button-primary"
+                            icon="pi pi-money-bill"
+                            severity="secondary"
+                            @click="ShowReservedModalRef.toggleModal(slotProps.data.id)"
+                            v-tooltip="'Mark as Paid'"
+                            rounded
+                        />
+                        <Button
+                            class="p-button-danger"
+                            icon="pi pi-file"
+                            @click="CreateIncidentReportModalRef.toggleModal(slotProps.data.id)"
+                            v-tooltip="'Create incident report'"
+                            rounded
+                        />
+                    </div>
                 </template>
             </Column>
         </DataTable>

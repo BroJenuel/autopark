@@ -20,14 +20,14 @@ const form = ref({
     street: null,
     latitude: null,
     longitude: null,
-    status: "available"
+    status: "available",
 });
 
 const statusOptions = [
     { name: "Available", code: "available" },
     { name: "Occupied", code: "occupied" },
     { name: "Not Available", code: "not_available" },
-    { name: "Reserved", code: "reserved" }
+    { name: "Reserved", code: "reserved" },
 ];
 
 const streetOptionLoading = ref(false);
@@ -54,8 +54,8 @@ function toggleModal(
         street: null,
         latitude: null,
         longitude: null,
-        status: "available"
-    }
+        status: "available",
+    },
 ) {
     if (data != null) {
         form.value = data;
@@ -91,7 +91,7 @@ async function submit() {
 }
 
 defineExpose({
-    toggleModal
+    toggleModal,
 });
 </script>
 
@@ -114,9 +114,9 @@ defineExpose({
             </div>
             <div class="flex flex-column gap-2 mb-3">
                 <label
-                >Street
+                    >Street
                     <RouterLink v-if="userStore.role === 'admin'" class="text-blue-500" to="/maintenance/street"
-                    >Manage Streets
+                        >Manage Streets
                     </RouterLink>
                 </label>
                 <Dropdown
