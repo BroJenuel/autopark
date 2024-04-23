@@ -1,5 +1,5 @@
 <script setup>
-import { createIncidentReport } from "@/service/supabase/create_incident_report";
+import { createIncidentReport } from "@/service/supabase/table/incident_report";
 import { getParkingSlotBooking } from "@/service/supabase/table/parking_slot";
 import { ref } from "vue";
 import { useToast } from "primevue/usetoast";
