@@ -45,7 +45,10 @@ function getTimeConsumed(timeStarted) {
  * @returns {string} - The formatted time consumed.
  */
 function formatTimeConsumed(timeConsumed_min) {
-    return timeConsumed_min ? dayjs(timeConsumed_min * 60000).format("H[h] m[m]") : "--";
+    const hours = Math.floor(timeConsumed_min / 60);
+    const minutes = timeConsumed_min % 60;
+    const formattedTime = hours > 0 ? `${hours}h ${minutes.toString().padStart(2, "0")}m` : `${minutes}m`;
+    return timeConsumed_min ? formattedTime : "N/A";
 }
 
 async function getParkingSlotLists() {
@@ -56,7 +59,7 @@ async function getParkingSlotLists() {
         .from("parking_slot_booking")
         .select("*, parking_slot(*)")
         .order("id", { ascending: false })
-        .is("paid_at", null)
+        .is("time_ended", null)
         .limit(1000);
 
     parkingSlotBooking.value = getParkingSlotBooking.data;
@@ -72,7 +75,9 @@ async function getParkingSlotLists() {
             timeConsumed_min:
                 item.status === "occupied"
                     ? getTimeConsumed(
-                          parkingSlotBooking.value.find((booking) => booking.parking_slot_id === item.id)?.time_started,
+                          parkingSlotBooking.value.find((booking) => {
+                              return booking.parking_slot_id === item.id;
+                          }).time_started,
                       )
                     : null,
         };
@@ -152,8 +157,7 @@ function isAboutToEnd(slot) {
     const isTimeStartedPassed3Hours = dayjs().diff(timeStarted, "hour") >= 3;
     if (isTimeStartedPassed3Hours) return "passed3Hours";
 
-    // check if its about to end 5 minutes before 3 hours
-    const isAboutToEnd = dayjs().diff(timeStarted, "minute") >= 5 && dayjs().diff(timeStarted, "hour") < 3;
+    const isAboutToEnd = dayjs().diff(timeStarted, "minute") >= 175; // 3 hours - 5 minutes
     if (isAboutToEnd) return "aboutToEnd";
 
     return false;

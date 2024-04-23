@@ -101,13 +101,11 @@ async function bookSlot() {
 }
 
 const handle2Hours = () => {
-    console.log("2 hours");
     showConfirmModal.value = true;
     hoursToOccupy.value = 2;
 };
 
 const handle3Hours = () => {
-    console.log("3 hours");
     showConfirmModal.value = true;
     hoursToOccupy.value = 3;
 };

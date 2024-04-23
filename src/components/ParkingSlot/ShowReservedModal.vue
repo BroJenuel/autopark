@@ -18,7 +18,6 @@ async function toggleModal(parking_slot_id) {
     }
 
     parkingSlotReserved.value = data[0];
-    console.log("test", parkingSlotReserved.value);
 
     visible.value = !visible.value;
 }
