@@ -203,10 +203,6 @@ const licenseExpirationMinDate = ref(dayjs().add("1", "day").toDate());
                             <label>Block No., Street, Village etc. *</label>
                             <InputText v-model="form.street" placeholder="ex. Blk. 1, " />
                         </div>
-                        <div class="flex flex-column gap-2 mb-3">
-                            <label>Block No., Street, Village etc. *</label>
-                            <InputText v-model="form.street" placeholder="ex. Blk. 1, " />
-                        </div>
                         <h3 class="mb-2">Drivers License</h3>
                         <div class="mb-3">
                             <label>License</label>
