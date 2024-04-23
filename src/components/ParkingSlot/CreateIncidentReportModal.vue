@@ -1,9 +1,9 @@
 <script setup>
-import { createIncidentReport } from "@/service/supabase/table/incident_report";
+import { createIncidentReport, uploadImage } from "@/service/supabase/table/incident_report";
 import { getParkingSlotBooking } from "@/service/supabase/table/parking_slot";
-import { ref } from "vue";
-import { useToast } from "primevue/usetoast";
 import { Loading } from "notiflix";
+import { useToast } from "primevue/usetoast";
+import { ref } from "vue";
 
 const form = ref({
     description: null,
@@ -45,8 +45,10 @@ async function handleSubmit() {
             throw new Error("Parking slot booking not found.");
         }
 
+        const uploadedImage = form.value.image ? await uploadImage(form.value.image) : null;
         await createIncidentReport({
             ...form.value,
+            image: uploadedImage,
             parking_slot_booking_id: data.id,
         });
 
