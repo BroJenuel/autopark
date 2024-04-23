@@ -268,19 +268,31 @@ function isAboutToEnd(slot) {
             </Column>
             <Column header="Action">
                 <template #body="slotProps">
-                    <Button
-                        v-if="slotProps.data.status === 'reserved'"
-                        icon="pi pi-money-bill"
-                        label="Mark as Paid"
-                        rounded
-                        severity="secondary"
-                        @click="ShowReservedModalRef.toggleModal(slotProps.data.id)"
-                    />
-                    <Button
-                        class="p-button-rounded p-button-success mr-2"
-                        icon="pi pi-pencil"
-                        @click="StoreParkingSlotRef.toggleModal(slotProps.data)"
-                    />
+                    <div className="flex gap-2">
+                        <Button
+                            class="p-button-success"
+                            icon="pi pi-pencil"
+                            @click="StoreParkingSlotRef.toggleModal(slotProps.data)"
+                            v-tooltip="'Edit'"
+                            rounded
+                        />
+                        <Button
+                            v-if="slotProps.data.status === 'reserved'"
+                            class="p-button-primary"
+                            icon="pi pi-money-bill"
+                            severity="secondary"
+                            @click="ShowReservedModalRef.toggleModal(slotProps.data.id)"
+                            v-tooltip="'Mark as Paid'"
+                            rounded
+                        />
+                        <Button
+                            class="p-button-danger"
+                            icon="pi pi-file"
+                            @click="StoreParkingSlotRef.toggleModal(slotProps.data)"
+                            v-tooltip="'Create incident report'"
+                            rounded
+                        />
+                    </div>
                 </template>
             </Column>
         </DataTable>
