@@ -7,11 +7,20 @@ import BookSlot from "@/components/ParkingSlot/BookSlot.vue";
 import { useRouter } from "vue-router";
 import { Report } from "notiflix";
 import dayjs from "dayjs";
+import customParseFormat from "dayjs/esm/plugin/customParseFormat";
+
+dayjs.extend(customParseFormat);
 
 const router = useRouter();
 const BookSlotRef = ref(null);
 const toast = useToast();
 const availableSlots = ref([]);
+const availableParkingHours = ref({
+    from: null,
+    to: null,
+});
+
+const customTimeFormat = "HH:mm:ssZ";
 
 async function getAvailableParkingSlots() {
     Loading.standard("loading parking slots...");
@@ -25,6 +34,47 @@ async function getAvailableParkingSlots() {
 
     availableSlots.value = data;
     setMap();
+}
+
+async function getParkingHours() {
+    Loading.standard("Fetching data...");
+
+    const { data, error } = await supabaseClient.from("parking_hours").select().eq("id", 1).limit(1).single();
+
+    Loading.remove();
+
+    if (error) {
+        toast.add({ severity: "error", summary: "Error", detail: error.message, life: 2000 });
+        return;
+    }
+
+    availableParkingHours.value = reduceParkingHours(data);
+    oldData.value = JSON.parse(JSON.stringify(data));
+}
+
+/**
+ * Checks if the current time is within the available parking hours.
+ * @returns {boolean} True if the current time is within the available parking hours, false otherwise.
+ */
+function isValidParkingTime() {
+    const { from, to } = availableParkingHours.value;
+    const currentTime = dayjs();
+    const fromTime = dayjs(from);
+    const toTime = dayjs(to);
+
+    return currentTime.isAfter(fromTime) && currentTime.isBefore(toTime);
+}
+
+/**
+ * Reduces the parking hours data.
+ * @param {{ from: string, to: string }} data - The parking hours data.
+ * @returns {{ from: Date, to: Date }}
+ */
+function reduceParkingHours(data) {
+    return {
+        from: dayjs(data.from, customTimeFormat).toDate(),
+        to: dayjs(data.to, customTimeFormat).toDate(),
+    };
 }
 
 function setMap() {
@@ -59,15 +109,17 @@ function setMap() {
         // add click event to each markers
         google.maps.event.addListener(marker, "click", () => {
             // check if time is greater than 7am and less than 7pm
-            if (dayjs().hour() < 7 || dayjs().hour() > 19) {
+            if (!isValidParkingTime()) {
                 Report.info(
-                    "Currently, parking is not available.",
-                    "Currently, parking is not available. <b>We allow parking between 7am and 7pm. </b>",
+                    "Parking is not available",
+                    `Currently, we only allow parking between ${dayjs(availableParkingHours.value.from).format(
+                        "hh:mm A",
+                    )} and ${dayjs(availableParkingHours.value.to).format("hh:mm A")}.`,
                     "Ok",
                     {
                         titleMaxLength: 999,
                         plainText: false,
-                    }
+                    },
                 );
                 return;
             }
@@ -83,6 +135,7 @@ function BookedSlot(data) {
 
 onMounted(async () => {
     await getAvailableParkingSlots();
+    await getParkingHours();
 });
 </script>
 
