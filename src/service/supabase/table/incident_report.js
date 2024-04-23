@@ -17,8 +17,10 @@ export async function uploadImage(image) {
     return data;
 }
 
-export async function fetchAllIncidentReports() {
-    const { data, error } = await supabaseClient.from("incident_reports").select("*");
+export async function fetchAllIncidentReportsWithParkingSlot() {
+    const { data, error } = await supabaseClient
+        .from("incident_reports")
+        .select("*, parking_slot_booking(user_profile(*), parking_slot(*))");
     if (error) {
         throw new Error(error);
     }

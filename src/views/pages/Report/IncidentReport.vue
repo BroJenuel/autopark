@@ -1,7 +1,8 @@
 <script setup>
 import PayBookingModal from "@/components/BookingList/PayBookModal.vue";
-import { fetchAllIncidentReports } from "@/service/supabase/table/incident_report";
+import { fetchAllIncidentReportsWithParkingSlot } from "@/service/supabase/table/incident_report";
 import dayjs from "dayjs";
+import { Loading } from "notiflix";
 import { FilterMatchMode } from "primevue/api";
 import { useToast } from "primevue/usetoast";
 import { onMounted, ref } from "vue";
@@ -16,7 +17,8 @@ const filters = ref({
 
 async function getIncidentReports() {
     try {
-        const data = await fetchAllIncidentReports();
+        Loading.standard();
+        const data = await fetchAllIncidentReportsWithParkingSlot();
         incidentReports.value = data;
     } catch (e) {
         toast.add({
@@ -25,6 +27,8 @@ async function getIncidentReports() {
             detail: e.message ?? "Unable to get incident reports",
             life: 3000,
         });
+    } finally {
+        Loading.remove();
     }
 }
 
@@ -62,13 +66,34 @@ onMounted(() => {
                         </IconField>
                     </div>
                 </template>
-                <Column field="created_at" header="Date Created" sortable>
+                <Column field="id" header="#"></Column>
+                <Column field="parking_slot" header="Parking Slot">
                     <template #body="slotProps">
-                        {{ dayjs(slotProps.data.created_at).format("D-MMM-YY HH:mm") }}
+                        <div class="flex flex-column gap-4">
+                            <div>
+                                {{ slotProps.data.parking_slot_booking.parking_slot.area }}
+                                {{ slotProps.data.parking_slot_booking.parking_slot.street }}
+                            </div>
+                            <div>
+                                <div>Driver Details:</div>
+                                <div>
+                                    <span>
+                                        {{ slotProps.data.parking_slot_booking.user_profile.data.first_name }}
+                                        {{ ` ` }}
+                                        {{ slotProps.data.parking_slot_booking.user_profile.data.last_name }}
+                                    </span>
+                                </div>
+                                <div>
+                                    {{ slotProps.data.parking_slot_booking.user_profile.data.driver_license }}
+                                </div>
+                                <div>
+                                    {{ slotProps.data.parking_slot_booking.user_profile.data.contact_number }}
+                                </div>
+                            </div>
+                        </div>
                     </template>
                 </Column>
-                <Column field="id" header="#"></Column>
-                <Column field="description" header="Description"></Column>
+                <Column field="description" header="Incident" sortable></Column>
                 <Column field="image" header="Image">
                     <template #body="slotProps">
                         <Image
@@ -81,8 +106,11 @@ onMounted(() => {
                         <span v-else>No Image</span>
                     </template>
                 </Column>
-                <Column field="parking_slot" header="Parking Slot" sortable></Column>
-                <Column field="incident" header="Incident" sortable></Column>
+                <Column field="created_at" header="Date Created" sortable>
+                    <template #body="slotProps">
+                        {{ dayjs(slotProps.data.created_at).format("D-MMM-YY HH:mm") }}
+                    </template>
+                </Column>
             </DataTable>
         </div>
     </div>
