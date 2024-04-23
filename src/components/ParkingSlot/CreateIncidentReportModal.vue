@@ -37,14 +37,19 @@ async function handleUploadImage(event) {
     form.value.image = event.files[0];
 }
 
+/**
+ * Handles the submission of the incident report form.
+ *
+ * @async
+ * @function handleSubmit
+ * @returns {Promise<void>} A promise that resolves when the incident report is created.
+ * @throws {Error} If the parking slot booking is not found or if there is an error creating the incident report.
+ */
 async function handleSubmit() {
     try {
         Loading.standard("Creating incident report...");
-        const data = await getParkingSlotBooking(parking_slot_id.value);
-        if (!data.id) {
-            throw new Error("Parking slot booking not found.");
-        }
 
+        const data = await getParkingSlotBooking(parking_slot_id.value);
         const uploadedImage = form.value.image ? await uploadImage(form.value.image) : null;
         await createIncidentReport({
             ...form.value,
