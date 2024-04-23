@@ -9,6 +9,7 @@ import { Confirm, Loading } from "notiflix";
 import { FilterMatchMode } from "primevue/api";
 import { useToast } from "primevue/usetoast";
 import { onMounted, ref } from "vue";
+import CreateIncidentReportModal from "../../../components/ParkingSlot/CreateIncidentReportModal.vue";
 
 const statusSelectUpdateSelected = ref(null);
 const selectedSlots = ref([]);
@@ -18,6 +19,7 @@ const toast = useToast();
 const StoreParkingSlotRef = ref();
 const ShowOccupiedModalRef = ref();
 const ShowReservedModalRef = ref();
+const CreateIncidentReportModalRef = ref();
 const parkingSlots = ref([]);
 const filters = ref({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS },
@@ -161,6 +163,7 @@ function isAboutToEnd(slot) {
     <ShowOccupiedModal ref="ShowOccupiedModalRef" />
     <ShowReservedModal ref="ShowReservedModalRef" @reloadParkingSlots="getParkingSlotLists" />
     <StoreParkingSlot ref="StoreParkingSlotRef" @stored="getParkingSlotLists" />
+    <CreateIncidentReportModal ref="CreateIncidentReportModalRef" />
     <Dialog
         v-model:visible="showUpdateStatusOfSelectedParkingSlot"
         :style="{ width: '30rem' }"
@@ -288,7 +291,7 @@ function isAboutToEnd(slot) {
                         <Button
                             class="p-button-danger"
                             icon="pi pi-file"
-                            @click="StoreParkingSlotRef.toggleModal(slotProps.data)"
+                            @click="CreateIncidentReportModalRef.toggleModal(slotProps.data.id)"
                             v-tooltip="'Create incident report'"
                             rounded
                         />
