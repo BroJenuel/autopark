@@ -51,7 +51,7 @@ async function getBookingList() {
             status = is15MinutePassed ? "Closed" : "Reserved";
         }
 
-        if (book.payment_method === "cod" && !!book.payment_amount) {
+        if (!book.time_ended && book.payment_method === "cod" && !!book.payment_amount) {
             status = "Occupied";
         }
 

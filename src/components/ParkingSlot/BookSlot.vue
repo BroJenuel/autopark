@@ -1,5 +1,6 @@
 <script setup>
 import Payment from "@/components/PaymentSimulation/Payment.vue";
+import { checkIfHasExistingBooking } from "@/service/supabase/table/parking_slot_booking";
 import { supabaseClient } from "@/service/supabase/supabase";
 import { Loading } from "notiflix";
 import { useToast } from "primevue/usetoast";
@@ -38,10 +39,25 @@ async function getPaymentAmount() {
 }
 
 async function bookSlot() {
+    Loading.standard("Checking for existing booking...");
+
+    const hasExistingBooking = await checkIfHasExistingBooking();
+    if (hasExistingBooking) {
+        Loading.remove();
+        toast.add({
+            severity: "error",
+            summary: "Error",
+            detail: "You have an existing booking. Please cancel it first before booking another slot.",
+            life: 6000,
+        });
+        return;
+    }
+    Loading.remove();
+
+    Loading.standard("Booking slot...");
+
     const parkingSlotId = slotDetails.value.id;
     const timeStarted = new Date();
-
-    Loading.hourglass("booking slot...");
 
     /** @type {number} */
     let payment_amount = 0;

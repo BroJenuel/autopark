@@ -57,9 +57,26 @@ function toggleModal(
         status: "available",
     },
 ) {
+    const { id, area, street, latitude, longitude, status } = data;
     if (data != null) {
-        form.value = data;
-        oldData.value = JSON.parse(JSON.stringify(data));
+        form.value = {
+            id,
+            area,
+            street,
+            latitude,
+            longitude,
+            status,
+        };
+        oldData.value = JSON.parse(
+            JSON.stringify({
+                id,
+                area,
+                street,
+                latitude,
+                longitude,
+                status,
+            }),
+        );
     }
     showModal.value = !showModal.value;
     getStreets();
