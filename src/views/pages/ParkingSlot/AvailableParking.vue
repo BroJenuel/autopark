@@ -57,6 +57,10 @@ async function getParkingHours() {
  * @returns {boolean} True if the current time is within the available parking hours, false otherwise.
  */
 function isValidParkingTime() {
+    if (process.env.NODE_ENV === "development") {
+        return true;
+    }
+
     const { from, to } = availableParkingHours.value;
     const currentTime = dayjs();
     const fromTime = dayjs(from);
