@@ -121,6 +121,12 @@ const router = createRouter({
                             name: 'Rates',
                             component: () => import('@/views/pages/Maintenance/Rates.vue'),
                             beforeEnter: adminOnly
+                        },
+                        {
+                            path: 'parking-hours',
+                            name: 'Parking Hours',
+                            component: () => import('@/views/pages/Maintenance/ParkingHours.vue'),
+                            beforeEnter: adminOnly
                         }
                     ]
                 },

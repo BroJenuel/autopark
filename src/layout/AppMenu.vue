@@ -29,6 +29,7 @@ const adminModal = [
         items: [
             { label: "Street", icon: "pi pi-fw pi-map", to: "/maintenance/street" },
             { label: "Rates", icon: "pi pi-fw pi-dollar", to: "/maintenance/rates" },
+            { label: "Parking Hours", icon: "pi pi-fw pi-map", to: "/maintenance/parking-hours" },
         ],
     },
     {
