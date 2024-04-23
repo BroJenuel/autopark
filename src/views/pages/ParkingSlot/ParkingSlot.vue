@@ -289,6 +289,9 @@ function isAboutToEnd(slot) {
                             rounded
                         />
                         <Button
+                            v-if="
+                                slotProps.data.status === 'occupied' && isAboutToEnd(slotProps.data) === 'passed3Hours'
+                            "
                             class="p-button-danger"
                             icon="pi pi-file"
                             @click="CreateIncidentReportModalRef.toggleModal(slotProps.data.id)"
