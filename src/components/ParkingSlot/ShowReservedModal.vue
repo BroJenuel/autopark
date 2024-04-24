@@ -80,7 +80,7 @@ defineExpose({
                 {{ dayjs(parkingSlotReserved.user_profile.data.driver_license_expiration).format("MMMM D, YYYY") }}
             </div>
 
-            <Button :style="{ marginTop: '1rem' }" @click="handleMarkAsPaid">Marked as Paid</Button>
+            <Button :style="{ marginTop: '1rem' }" @click="handleMarkAsPaid">Mark as Paid</Button>
         </div>
     </Dialog>
 </template>
