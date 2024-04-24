@@ -299,7 +299,11 @@ async function cancelBooking(booking) {
                         />
                     </div>
                     <Button
-                        v-if="!(book.payment_amount > 0) && book.status !== 'Closed' && !data.time_ended"
+                        v-if="
+                            !(book.payment_amount && book.payment_amount > 0) &&
+                            book.status !== 'Closed' &&
+                            !book.time_ended
+                        "
                         icon="pi pi-money-bill"
                         label="Pay"
                         rounded
@@ -307,13 +311,17 @@ async function cancelBooking(booking) {
                         @click="PayBookingModalRef.toggleModal(book)"
                     />
                     <Button
-                        v-if="!(data.payment_amount > 0) && data.status !== 'Closed' && book.status !== 'Done'"
+                        v-if="
+                            !(book.payment_amount && book.payment_amount > 0) &&
+                            book.status !== 'Closed' &&
+                            book.status !== 'Done'
+                        "
                         icon="pi pi-money-bill"
                         label="Cancel Booking"
                         rounded
                         severity="danger"
                         class="mt-2"
-                        @click="cancelBooking(data)"
+                        @click="cancelBooking(book)"
                     />
                 </div>
             </div>
