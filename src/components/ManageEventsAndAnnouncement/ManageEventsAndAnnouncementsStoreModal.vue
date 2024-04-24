@@ -135,7 +135,7 @@ defineExpose({
                     class="w-full md:w-14rem"
                     optionLabel="name"
                     optionValue="code"
-                    placeholder="Select Status"
+                    placeholder="Select Type"
                     required
                 />
             </div>
