@@ -10,6 +10,7 @@ import { FilterMatchMode } from "primevue/api";
 import { useToast } from "primevue/usetoast";
 import { onMounted, ref } from "vue";
 import CreateIncidentReportModal from "../../../components/ParkingSlot/CreateIncidentReportModal.vue";
+import MarkAsAvailableModal from "@/components/ParkingSlot/MarkAsAvailableModal.vue";
 
 const statusSelectUpdateSelected = ref(null);
 const selectedSlots = ref([]);
@@ -20,6 +21,7 @@ const StoreParkingSlotRef = ref();
 const ShowOccupiedModalRef = ref();
 const ShowReservedModalRef = ref();
 const CreateIncidentReportModalRef = ref();
+const MarkAsAvailableModalRef = ref();
 const parkingSlots = ref([]);
 const filters = ref({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS },
@@ -168,6 +170,8 @@ function isAboutToEnd(slot) {
     <ShowReservedModal ref="ShowReservedModalRef" @reloadParkingSlots="getParkingSlotLists" />
     <StoreParkingSlot ref="StoreParkingSlotRef" @stored="getParkingSlotLists" />
     <CreateIncidentReportModal ref="CreateIncidentReportModalRef" />
+    <MarkAsAvailableModal ref="MarkAsAvailableModalRef" @reloadParkingSlots="getParkingSlotLists" />
+
     <Dialog
         v-model:visible="showUpdateStatusOfSelectedParkingSlot"
         :style="{ width: '30rem' }"
@@ -290,6 +294,14 @@ function isAboutToEnd(slot) {
                             severity="secondary"
                             @click="ShowReservedModalRef.toggleModal(slotProps.data.id)"
                             v-tooltip="'Mark as Paid'"
+                            rounded
+                        />
+                        <Button
+                            v-if="slotProps.data.status === 'occupied'"
+                            icon="pi pi-check"
+                            severity="info"
+                            @click="MarkAsAvailableModalRef.toggleModal(slotProps.data.id)"
+                            v-tooltip="'Mark as Available'"
                             rounded
                         />
                         <Button

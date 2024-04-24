@@ -16,3 +16,7 @@ export async function checkIfHasExistingBooking() {
 
     return data.length > 0;
 }
+
+export async function markAsAvailable(id) {
+    return supabaseClient.rpc("mark_as_available", { parking_slot_id_update: id }).throwOnError();
+}
