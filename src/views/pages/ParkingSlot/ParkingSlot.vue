@@ -11,6 +11,7 @@ import { useToast } from "primevue/usetoast";
 import { onMounted, ref } from "vue";
 import CreateIncidentReportModal from "../../../components/ParkingSlot/CreateIncidentReportModal.vue";
 import MarkAsAvailableModal from "@/components/ParkingSlot/MarkAsAvailableModal.vue";
+import { fetchParkingLimit } from "@/service/supabase/table/parking_limit";
 
 const statusSelectUpdateSelected = ref(null);
 const selectedSlots = ref([]);
@@ -27,6 +28,7 @@ const filters = ref({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS },
 });
 const parkingSlotBooking = ref([]);
+const parkingLimit = ref(null);
 
 /**
  * Calculate the time consumed based on the time started.
@@ -51,6 +53,19 @@ function formatTimeConsumed(timeConsumed_min) {
     const minutes = timeConsumed_min % 60;
     const formattedTime = hours > 0 ? `${hours}h ${minutes.toString().padStart(2, "0")}m` : `${minutes}m`;
     return timeConsumed_min ? formattedTime : "N/A";
+}
+
+async function getParkingLimit() {
+    loading.value = true;
+    try {
+        const data = await fetchParkingLimit();
+        parkingLimit.value = data.parking_limit;
+    } catch (e) {
+        toast.add({ severity: "error", summary: "Error", detail: e.message ?? "Unable to get the parking limit.." });
+        return;
+    } finally {
+        loading.value = false;
+    }
 }
 
 async function getParkingSlotLists() {
@@ -99,7 +114,8 @@ function badgeTypeStatus(status) {
 }
 
 onMounted(async () => {
-    await getParkingSlotLists();
+    const promises = [getParkingSlotLists(), getParkingLimit()];
+    await Promise.all(promises);
 });
 
 function updateParkingSlotStatus() {
@@ -155,11 +171,12 @@ function isAboutToEnd(slot) {
 
     const timeStarted = dayjs(booking.time_started);
 
-    // is timeStarted passed 3 hours
-    const isTimeStartedPassed3Hours = dayjs().diff(timeStarted, "hour") >= 3;
-    if (isTimeStartedPassed3Hours) return "passed3Hours";
+    // is timeStarted passed the time limit
+    const isTimeStartedPassed3Hours = dayjs().diff(timeStarted, "hour") >= parkingLimit.value ?? 3;
+    if (isTimeStartedPassed3Hours) return "passedTimeLimit";
 
-    const isAboutToEnd = dayjs().diff(timeStarted, "minute") >= 175; // 3 hours - 5 minutes
+    const isAboutToEndMinutes = parkingLimit.value * 60 - 5;
+    const isAboutToEnd = dayjs().diff(timeStarted, "minute") >= isAboutToEndMinutes;
     if (isAboutToEnd) return "aboutToEnd";
 
     return false;
@@ -269,8 +286,12 @@ function isAboutToEnd(slot) {
                         :severity="badgeTypeStatus(slotProps.data.status)"
                         :value="slotProps.data.status"
                     ></Badge>
-                    <InlineMessage v-if="isAboutToEnd(slotProps.data) === 'passed3Hours'" class="mt-2" severity="error">
-                        This already passed 3 hours.
+                    <InlineMessage
+                        v-if="isAboutToEnd(slotProps.data) === 'passedTimeLimit'"
+                        class="mt-2"
+                        severity="error"
+                    >
+                        This already passed {{ parkingLimit ?? 3 }} hours.
                     </InlineMessage>
                     <InlineMessage v-if="isAboutToEnd(slotProps.data) === 'aboutToEnd'" class="mt-2" severity="warn">
                         This occupied slot is about to end.
@@ -306,7 +327,8 @@ function isAboutToEnd(slot) {
                         />
                         <Button
                             v-if="
-                                slotProps.data.status === 'occupied' && isAboutToEnd(slotProps.data) === 'passed3Hours'
+                                slotProps.data.status === 'occupied' &&
+                                isAboutToEnd(slotProps.data) === 'passedTimeLimit'
                             "
                             class="p-button-danger"
                             icon="pi pi-file"
