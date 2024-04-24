@@ -33,6 +33,11 @@ const filters = ref({
 });
 const parkingSlotBooking = ref([]);
 const parkingLimit = ref(null);
+const statusOptions = [
+    { name: "Available", code: "available" },
+    { name: "Occupied", code: "occupied" },
+    { name: "Not Available", code: "not_available" },
+];
 
 /**
  * Calculate the time consumed based on the time started.
@@ -203,9 +208,11 @@ function isAboutToEnd(slot) {
         <div class="mb-4">
             <Dropdown
                 v-model="statusSelectUpdateSelected"
-                :options="['Available', 'Occupied', 'Closed', 'Deleted']"
+                :options="statusOptions"
                 class="w-full md:w-14rem"
                 placeholder="Select Status"
+                optionLabel="name"
+                optionValue="code"
             />
         </div>
         <Button @click="updateParkingSlotStatus">Update</Button>
