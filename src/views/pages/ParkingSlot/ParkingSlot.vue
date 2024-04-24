@@ -11,6 +11,7 @@ import { useToast } from "primevue/usetoast";
 import { onMounted, ref } from "vue";
 import CreateIncidentReportModal from "../../../components/ParkingSlot/CreateIncidentReportModal.vue";
 import MarkAsAvailableModal from "@/components/ParkingSlot/MarkAsAvailableModal.vue";
+import MarkAsOccupiedModal from "@/components/ParkingSlot/MarkAsOccupiedModal.vue";
 import { fetchParkingLimit } from "@/service/supabase/table/parking_limit";
 
 const statusSelectUpdateSelected = ref(null);
@@ -23,6 +24,7 @@ const ShowOccupiedModalRef = ref();
 const ShowReservedModalRef = ref();
 const CreateIncidentReportModalRef = ref();
 const MarkAsAvailableModalRef = ref();
+const MarkAsOccupiedModalRef = ref();
 const parkingSlots = ref([]);
 const filters = ref({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS },
@@ -188,6 +190,7 @@ function isAboutToEnd(slot) {
     <StoreParkingSlot ref="StoreParkingSlotRef" @stored="getParkingSlotLists" />
     <CreateIncidentReportModal ref="CreateIncidentReportModalRef" />
     <MarkAsAvailableModal ref="MarkAsAvailableModalRef" @reloadParkingSlots="getParkingSlotLists" />
+    <MarkAsOccupiedModal ref="MarkAsOccupiedModalRef" @reloadParkingSlots="getParkingSlotLists" />
 
     <Dialog
         v-model:visible="showUpdateStatusOfSelectedParkingSlot"
@@ -315,6 +318,14 @@ function isAboutToEnd(slot) {
                             severity="secondary"
                             @click="ShowReservedModalRef.toggleModal(slotProps.data.id)"
                             v-tooltip="'Mark as Paid'"
+                            rounded
+                        />
+                        <Button
+                            v-if="slotProps.data.status === 'available'"
+                            icon="pi pi-user"
+                            severity="primary"
+                            @click="MarkAsOccupiedModalRef.toggleModal(slotProps.data.id)"
+                            v-tooltip="'Mark as Occupied'"
                             rounded
                         />
                         <Button

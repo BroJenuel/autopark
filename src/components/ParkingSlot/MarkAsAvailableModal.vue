@@ -11,16 +11,39 @@ const parkingSlotOccupied = ref(null);
 const toast = useToast();
 const visible = ref(false);
 const emits = defineEmits(["reloadParkingSlots"]);
+const parkingSlotId = ref(null);
+
+const driverDetails = ref({
+    name: "",
+    driver_license: "",
+    driver_license_expiration: "",
+});
 
 async function toggleModal(parking_slot_id) {
+    parkingSlotId.value = parking_slot_id;
+    Loading.standard("Loading...");
     const { data, error } = await getOccupiedTheSlot(parking_slot_id);
+    Loading.remove();
 
     if (error) {
         toast.add({ severity: "error", summary: "Error", detail: error.message, life: 6000 });
         return;
     }
 
-    parkingSlotOccupied.value = data[0];
+    if (data[0].user_profile) {
+        driverDetails.value.name = data[0].user_profile.first_name + " " + data[0].user_profile.last_name;
+        driverDetails.value.driver_license = data[0].user_profile.driver_license;
+        driverDetails.value.driver_license_expiration = dayjs(
+            parkingSlotOccupied.user_profile.data.driver_license_expiration,
+        ).format("MMMM D, YYYY");
+    } else if (data[0].unregistered_user_details) {
+        const parsedData = JSON.parse(data[0].unregistered_user_details);
+        driverDetails.value.name = "Unregistered User";
+        driverDetails.value.driver_license = parsedData.driver_license;
+        driverDetails.value.driver_license_expiration = dayjs(parsedData.driver_license_expiration).format(
+            "MMMM D, YYYY",
+        );
+    }
 
     visible.value = !visible.value;
 }
@@ -35,10 +58,10 @@ async function getOccupiedTheSlot(parking_slot_id) {
         .limit(1);
 }
 
-async function handleMarkAsPaid() {
+async function handleMarkAsAvailable() {
     try {
         Loading.standard(`Marking parking slot as "Available"`);
-        await markAsAvailable(parkingSlotOccupied.value.parking_slot_id);
+        await markAsAvailable(parkingSlotId.value);
         emits("reloadParkingSlots");
         visible.value = false;
     } catch (e) {
@@ -60,24 +83,20 @@ defineExpose({
 
 <template>
     <Dialog v-model:visible="visible" modal header="Occupied by" :style="{ width: '25rem' }">
-        <div v-if="parkingSlotOccupied && parkingSlotOccupied.user_profile && parkingSlotOccupied.user_profile.data">
-            <div>
-                Name: {{ parkingSlotOccupied.user_profile.data.first_name }}
-                {{ parkingSlotOccupied.user_profile.data.last_name }}
-            </div>
-            <div>Email: {{ parkingSlotOccupied.user_profile.data.email }}</div>
+        <div>
+            <div>Name: {{ driverDetails.name }}</div>
             <div>
                 Driver License:
-                <span style="text-transform: uppercase">{{
-                    parkingSlotOccupied.user_profile.data.driver_license
-                }}</span>
+                <span style="text-transform: uppercase">{{ driverDetails.driver_license }}</span>
             </div>
             <div>
                 Driver License Exp:
-                {{ dayjs(parkingSlotOccupied.user_profile.data.driver_license_expiration).format("MMMM D, YYYY") }}
+                {{ driverDetails.driver_license_expiration }}
             </div>
 
-            <Button :style="{ marginTop: '1rem' }" severity="info" @click="handleMarkAsPaid">Mark as Available</Button>
+            <Button :style="{ marginTop: '1rem' }" severity="info" @click="handleMarkAsAvailable">
+                Mark as Available
+            </Button>
         </div>
     </Dialog>
 </template>
