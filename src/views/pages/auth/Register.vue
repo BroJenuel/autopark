@@ -152,12 +152,7 @@ const licenseExpirationMinDate = ref(dayjs().add("1", "day").toDate());
                             </div>
                             <div class="flex flex-column gap-2 mb-3">
                                 <label>Password</label>
-                                <Password
-                                    v-model="form.password"
-                                    placeholder="ex. 09503244478"
-                                    required
-                                    style="display: grid"
-                                />
+                                <Password v-model="form.password" required style="display: grid" />
                             </div>
                         </div>
 

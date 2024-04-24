@@ -203,9 +203,9 @@ function isAboutToEnd(slot) {
         <div class="mb-4">
             <Dropdown
                 v-model="statusSelectUpdateSelected"
-                :options="['available', 'occupied', 'closed', 'deleted']"
+                :options="['Available', 'Occupied', 'Closed', 'Deleted']"
                 class="w-full md:w-14rem"
-                placeholder="Select a City"
+                placeholder="Select Status"
             />
         </div>
         <Button @click="updateParkingSlotStatus">Update</Button>
