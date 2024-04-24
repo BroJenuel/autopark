@@ -13,7 +13,9 @@ import CreateIncidentReportModal from "../../../components/ParkingSlot/CreateInc
 import MarkAsAvailableModal from "@/components/ParkingSlot/MarkAsAvailableModal.vue";
 import MarkAsOccupiedModal from "@/components/ParkingSlot/MarkAsOccupiedModal.vue";
 import { fetchParkingLimit } from "@/service/supabase/table/parking_limit";
+import { useUserStore } from "@/store/userStore";
 
+const userStore = useUserStore();
 const statusSelectUpdateSelected = ref(null);
 const selectedSlots = ref([]);
 const showUpdateStatusOfSelectedParkingSlot = ref(false);
@@ -308,6 +310,7 @@ function isAboutToEnd(slot) {
                             class="p-button-success"
                             icon="pi pi-pencil"
                             @click="StoreParkingSlotRef.toggleModal(slotProps.data)"
+                            v-if="userStore.role === 'admin' || userStore.role === 'team_leader'"
                             v-tooltip="'Edit'"
                             rounded
                         />
