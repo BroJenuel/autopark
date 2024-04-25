@@ -31,9 +31,9 @@ async function toggleModal(parking_slot_id) {
     }
 
     if (data[0].user_profile) {
-        driverDetails.value.name = data[0].user_profile.first_name + " " + data[0].user_profile.last_name;
-        driverDetails.value.driver_license = data[0].user_profile.driver_license;
-        driverDetails.value.driver_license_expiration = dayjs(data[0].user_profile.driver_license_expiration).format(
+        driverDetails.value.name = data[0].user_profile.data.first_name + " " + data[0].user_profile.data.last_name;
+        driverDetails.value.driver_license = data[0].user_profile.data.driver_license;
+        driverDetails.value.driver_license_expiration = dayjs(data[0].user_profile.data.driver_license_expiration).format(
             "MMMM D, YYYY",
         );
     } else if (data[0].unregistered_user_details) {
