@@ -63,9 +63,15 @@ async function bookSlot() {
     let payment_amount = 0;
     /** @type {Date | null} */
     let paid_at = null;
+    /** @type {number | null} */
+    let reserved_hours = null;
+
     if (selectedPaymentMethod.value === "gcash" || selectedPaymentMethod.value === "maya") {
         payment_amount = await getPaymentAmount();
         paid_at = new Date();
+    }
+    if (selectedPaymentMethod.value === "cod") {
+        reserved_hours = hoursToOccupy.value;
     }
 
     const { error } = await supabaseClient.from("parking_slot_booking").insert([
@@ -76,6 +82,7 @@ async function bookSlot() {
             payment_method_details: paymentMethodData.value,
             payment_amount,
             paid_at,
+            reserved_hours,
         },
     ]);
 

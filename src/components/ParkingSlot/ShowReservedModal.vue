@@ -1,33 +1,51 @@
 <script setup>
 import { ref } from "vue";
 import { supabaseClient } from "@/service/supabase/supabase";
+import { fetchParkingRates } from "@/service/supabase/table/settings";
 import { Loading } from "notiflix";
 import { useToast } from "primevue/usetoast";
 import dayjs from "dayjs";
 
 const parkingSlotReserved = ref(null);
+const parkingRates = ref({
+    first_two_hours: 50,
+    exceed_rate_per_hour: 30,
+});
 const toast = useToast();
 const visible = ref(false);
 const emits = defineEmits(["reloadParkingSlots"]);
+
 async function toggleModal(parking_slot_id) {
-    const { data, error } = await getParkingSlot(parking_slot_id);
+    try {
+        Loading.standard();
+        const { data } = await getParkingSlot(parking_slot_id);
+        const { data: settings } = await fetchParkingRates();
 
-    if (error) {
-        toast.add({ severity: "error", summary: "Error", detail: error.message, life: 6000 });
+        parkingSlotReserved.value = data;
+        console.log("test", { data });
+        parkingRates.value = settings;
+        visible.value = !visible.value;
+    } catch (e) {
+        toast.add({ severity: "error", summary: "Error", detail: e.message, life: 6000 });
         return;
+    } finally {
+        Loading.remove();
     }
+}
 
-    parkingSlotReserved.value = data[0];
-
-    visible.value = !visible.value;
+function calculatePaymentAmount(hoursOccupied) {
+    return hoursOccupied <= 2
+        ? parkingRates.value.first_two_hours
+        : parkingRates.value.first_two_hours + (hoursOccupied - 2) * parkingRates.value.exceed_rate_per_hour;
 }
 
 async function handleMarkAsPaid() {
     // Start a transaction
     Loading.standard(`Marking parking slot as "Paid"`);
 
-    const { error } = await supabaseClient.rpc("mark_as_paid", {
+    const { error } = await supabaseClient.rpc("mark_as_paid_v2", {
         parking_slot_id_update: parkingSlotReserved.value.parking_slot_id,
+        payment_amount_update: calculatePaymentAmount(parkingSlotReserved.value.reserved_hours ?? 2),
     });
 
     Loading.remove();
@@ -42,6 +60,13 @@ async function handleMarkAsPaid() {
         return;
     }
 
+    toast.add({
+        severity: "success",
+        summary: "Success",
+        detail: 'Parking slot has been marked as "Paid"',
+        life: 3000,
+    });
+
     emits("reloadParkingSlots");
     visible.value = false;
 }
@@ -53,7 +78,9 @@ async function getParkingSlot(parking_slot_id) {
         .eq("parking_slot_id", parking_slot_id)
         .filter("time_ended", "is", null)
         .order("id", { ascending: false })
-        .limit(1);
+        .limit(1)
+        .single()
+        .throwOnError();
 }
 
 defineExpose({

@@ -11,6 +11,7 @@ export async function checkIfHasExistingBooking() {
         .select("*, parking_slot!inner(*)")
         .eq("user_id", theUser.data.user.id)
         .eq("parking_slot.status", "occupied")
+        .is('time_ended', null)
         .limit(1)
         .throwOnError();
 
